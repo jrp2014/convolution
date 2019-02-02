@@ -32,3 +32,36 @@ mean                 24.43 ms   (23.83 ms .. 25.14 ms)
 std dev              1.445 ms   (1.109 ms .. 1.780 ms)
 variance introduced by outliers: 20% (moderately inflated)
 ```
+
+And testing on a MacBook Pro 2018, the naivest implementation still wins,
+even over `Data.Vector`.  `Data.Vector.Unboxed` seems to be slower.
+
+```
+./naive +RTS -N6
+benchmarking Naive Convolution
+time                 2.313 ms   (2.257 ms .. 2.367 ms)
+                     0.994 R²   (0.990 R² .. 0.997 R²)
+mean                 2.364 ms   (2.325 ms .. 2.405 ms)
+std dev              138.2 μs   (119.0 μs .. 174.7 μs)
+variance introduced by outliers: 41% (moderately inflated)
+
+benchmarking Reduced Convolution
+time                 33.15 ms   (32.20 ms .. 34.53 ms)
+                     0.994 R²   (0.987 R² .. 0.998 R²)
+mean                 33.98 ms   (33.34 ms .. 34.78 ms)
+std dev              1.582 ms   (972.0 μs .. 2.521 ms)
+variance introduced by outliers: 12% (moderately inflated)
+
+benchmarking Parallelized Convolution
+time                 14.35 ms   (14.15 ms .. 14.50 ms)
+                     0.999 R²   (0.998 R² .. 1.000 R²)
+mean                 14.23 ms   (14.07 ms .. 14.36 ms)
+std dev              358.4 μs   (274.6 μs .. 523.6 μs)
+
+benchmarking Vector Naive Convolution
+time                 2.596 ms   (2.586 ms .. 2.603 ms)
+                     1.000 R²   (1.000 R² .. 1.000 R²)
+mean                 2.609 ms   (2.596 ms .. 2.643 ms)
+std dev              73.04 μs   (8.910 μs .. 151.1 μs)
+variance introduced by outliers: 13% (moderately inflated)
+```
