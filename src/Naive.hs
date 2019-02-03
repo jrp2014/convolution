@@ -7,6 +7,7 @@ import Control.Parallel.Strategies
 import Data.List (foldl', tails)
 import qualified Data.Map as M
 import qualified Data.Vector as V
+import qualified Data.Array as A
 
 sum' :: (Foldable t, Num a) => t a -> a
 sum' = foldl' (+) 0
@@ -36,6 +37,20 @@ convolveV hs xs =
         let sample = V.sum $ V.zipWith (*) ts hs
          in V.cons sample (roll hs (V.tail ts))
 
+convolveA ::
+     (A.Ix a, Integral a, Num b) => A.Array a b -> A.Array a b -> A.Array a b
+convolveA x1 x2 =
+  A.listArray
+    (0, m3)
+    [ sum [x1 A.! k * x2 A.! (n - k) | k <- [max 0 (n - m2) .. min n m1]]
+    | n <- [0 .. m3]
+    ]
+        -- TODO::check whether bouds are correct
+  where
+    m1 = snd $ A.bounds x1
+    m2 = snd $ A.bounds x2
+    m3 = m1 + m2
+
 convolve' :: (Num a) => [a] -> [a] -> [a]
 convolve' hs xs =
   let pad = replicate (length hs - 1) 0
@@ -53,6 +68,7 @@ data ConvType
   | Reduced
   | Parallel
   | VectorNaive
+  | ArrayNaive
   deriving (Eq, Ord)
 
 convTypes :: M.Map ConvType ([Int] -> [Int] -> [Int])
@@ -61,3 +77,7 @@ convTypes =
 
 convVTypes :: M.Map ConvType (V.Vector Int -> V.Vector Int -> V.Vector Int)
 convVTypes = M.fromList [(VectorNaive, convolveV)]
+
+convATypes ::
+     M.Map ConvType (A.Array Int Int -> A.Array Int Int -> A.Array Int Int)
+convATypes = M.fromList [(ArrayNaive, convolveA)]

@@ -2,11 +2,9 @@
 ## Experiments in convolution in haskell
 
 The starting point for this experiment is https://www.blaenkdenum.com/posts/naive-convolution-in-haskell/
-from 2013. The performance results are, however, very different: the naive
+from 2013. The 2019 performance results are, however, very different: the naive
 approach is fastest. Note that the `stream-fusion` package is no longer
 available.
-
-
 
 
 ```
@@ -71,4 +69,74 @@ time                 2.596 ms   (2.586 ms .. 2.603 ms)
 mean                 2.609 ms   (2.596 ms .. 2.643 ms)
 std dev              73.04 μs   (8.910 μs .. 151.1 μs)
 variance introduced by outliers: 13% (moderately inflated)
+```
+
+And now with a simple Array
+```
+cabal new-exec convolution +RTS -N4 -s
+benchmarking Naive Convolution
+time                 2.292 ms   (2.216 ms .. 2.352 ms)
+                     0.989 R²   (0.980 R² .. 0.994 R²)
+mean                 2.894 ms   (2.705 ms .. 3.157 ms)
+std dev              768.4 μs   (569.8 μs .. 972.9 μs)
+variance introduced by outliers: 94% (severely inflated)
+
+benchmarking Reduced Convolution
+time                 40.59 ms   (38.46 ms .. 41.80 ms)
+                     0.993 R²   (0.978 R² .. 0.999 R²)
+mean                 44.97 ms   (43.57 ms .. 47.22 ms)
+std dev              3.566 ms   (2.319 ms .. 5.382 ms)
+variance introduced by outliers: 27% (moderately inflated)
+
+benchmarking Parallelized Convolution
+time                 38.35 ms   (34.08 ms .. 43.17 ms)
+                     0.901 R²   (0.738 R² .. 0.984 R²)
+mean                 60.53 ms   (51.71 ms .. 72.76 ms)
+std dev              20.31 ms   (12.53 ms .. 28.73 ms)
+variance introduced by outliers: 91% (severely inflated)
+
+benchmarking Vector Naive Convolution
+time                 4.519 ms   (3.845 ms .. 5.058 ms)
+                     0.917 R²   (0.890 R² .. 0.952 R²)
+mean                 4.022 ms   (3.820 ms .. 4.322 ms)
+std dev              715.5 μs   (499.1 μs .. 949.6 μs)
+variance introduced by outliers: 86% (severely inflated)
+
+benchmarking Array Naive Convolution
+time                 31.23 ms   (28.17 ms .. 34.47 ms)
+                     0.948 R²   (0.889 R² .. 0.984 R²)
+mean                 41.49 ms   (37.52 ms .. 48.18 ms)
+std dev              10.12 ms   (7.093 ms .. 15.47 ms)
+variance introduced by outliers: 79% (severely inflated)
+
+      98,965,168 bytes allocated in the heap
+      40,748,728 bytes copied during GC
+       9,861,296 bytes maximum residency (8 sample(s))
+         223,056 bytes maximum slop
+              23 MB total memory in use (0 MB lost due to fragmentation)
+
+                                     Tot time (elapsed)  Avg pause  Max pause
+  Gen  0        87 colls,    87 par    0.326s   0.081s     0.0009s    0.0135s
+  Gen  1         8 colls,     7 par    0.019s   0.005s     0.0006s    0.0010s
+
+  Parallel GC work balance: 14.63% (serial 0%, perfect 100%)
+
+  TASKS: 10 (1 bound, 9 peak workers (9 total), using -N4)
+
+  SPARKS: 0 (0 converted, 0 overflowed, 0 dud, 0 GC'd, 0 fizzled)
+
+  INIT    time    0.003s  (  0.002s elapsed)
+  MUT     time    0.069s  ( 26.476s elapsed)
+  GC      time    0.345s  (  0.086s elapsed)
+  EXIT    time    0.001s  (  0.007s elapsed)
+  Total   time    0.418s  ( 26.571s elapsed)
+
+  Alloc rate    1,430,954,250 bytes per MUT second
+
+  Productivity  16.7% of total user, 99.7% of total elapsed
+
+gc_alloc_block_sync: 11818
+whitehole_spin: 0
+gen[0].sync: 0
+gen[1].sync: 1977
 ```
