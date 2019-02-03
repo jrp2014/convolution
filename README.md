@@ -1,5 +1,5 @@
 # convolution
-##Experiments in convolution in haskell
+## Experiments in convolution in haskell
 
 The starting point for this experiment is https://www.blaenkdenum.com/posts/naive-convolution-in-haskell/
 from 2013. The performance results are, however, very different: the naive
