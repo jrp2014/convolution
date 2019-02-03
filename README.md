@@ -1,5 +1,12 @@
 # convolution
-Experiments in convolution in haskell
+##Experiments in convolution in haskell
+
+The starting point for this experiment is https://www.blaenkdenum.com/posts/naive-convolution-in-haskell/
+from 2013. The performance results are, however, very different: the naive
+approach is fastest. Note that the `stream-fusion` package is no longer
+available.
+
+
 
 
 ```
