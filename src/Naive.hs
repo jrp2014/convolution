@@ -51,7 +51,7 @@ convolveA x1 x2 =
     m2 = snd $ A.bounds x2
     m3 = m1 + m2
 
-convolveR :: Num a => [a] -> [a] -> [a]
+convolveR :: (Num a) => [a] -> [a] -> [a]
 convolveR xs ys = map sum $ foldr f [] xs
   where
     f x zs = foldr (g x) id ys ([] : zs)
@@ -59,7 +59,7 @@ convolveR xs ys = map sum $ foldr f [] xs
     g x y a [] = [x * y] : a []
 
 -- TODO:: refactor
-convolveL :: Num a => [a] -> [a] -> [a]
+convolveL :: (Num a) => [a] -> [a] -> [a]
 convolveL xs ys = map sum $ foldl' (\h b x -> h (f b x)) id xs []
   where
     f x zs = foldl' (\h b y -> h (g x b y)) id ys id ([] : zs)
