@@ -2,12 +2,12 @@ module Naive where
 
 import Control.Parallel.Strategies
 
+import qualified Data.Array as A
 -- from https://www.blaenkdenum.com/posts/naive-convolution-in-haskell/
 --
 import Data.List (foldl', tails)
 import qualified Data.Map as M
 import qualified Data.Vector as V
-import qualified Data.Array as A
 
 sum' :: (Foldable t, Num a) => t a -> a
 sum' = foldl' (+) 0
@@ -51,6 +51,21 @@ convolveA x1 x2 =
     m2 = snd $ A.bounds x2
     m3 = m1 + m2
 
+convolveR :: Num a => [a] -> [a] -> [a]
+convolveR xs ys = map sum $ foldr f [] xs
+  where
+    f x zs = foldr (g x) id ys ([] : zs)
+    g x y a (z:zs) = ((x * y) : z) : a zs
+    g x y a [] = [x * y] : a []
+
+-- TODO:: refactor
+convolveL :: Num a => [a] -> [a] -> [a]
+convolveL xs ys = map sum $ foldl' (\h b x -> h (f b x)) id xs []
+  where
+    f x zs = foldl' (\h b y -> h (g x b y)) id ys id ([] : zs)
+    g x y a (z:zs) = ((x * y) : z) : a zs
+    g x y a [] = [x * y] : a []
+
 convolve' :: (Num a) => [a] -> [a] -> [a]
 convolve' hs xs =
   let pad = replicate (length hs - 1) 0
@@ -67,13 +82,21 @@ data ConvType
   = Naive
   | Reduced
   | Parallel
+  | DirectR
+  | DirectL
   | VectorNaive
   | ArrayNaive
   deriving (Eq, Ord)
 
 convTypes :: M.Map ConvType ([Int] -> [Int] -> [Int])
 convTypes =
-  M.fromList [(Naive, convolve), (Reduced, convolve'), (Parallel, parConvolve)]
+  M.fromList
+    [ (Naive, convolve)
+    , (Reduced, convolve')
+    , (Parallel, parConvolve)
+    , (DirectR, convolveR)
+    , (DirectL, convolveL)
+    ]
 
 convVTypes :: M.Map ConvType (V.Vector Int -> V.Vector Int -> V.Vector Int)
 convVTypes = M.fromList [(VectorNaive, convolveV)]

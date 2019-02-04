@@ -17,6 +17,8 @@ main =
     [ bench "Naive Convolution" (runConv Naive)
     , bench "Reduced Convolution" (runConv Reduced)
     , bench "Parallelized Convolution" (runConv Parallel)
+    , bench "Direct Convolution (foldr)" (runConv DirectR)
+    , bench "Direct Convolution (foldl')" (runConv DirectL)
     , bench "Vector Naive Convolution" (runConvV VectorNaive)
     , bench "Array Naive Convolution" (runConvA ArrayNaive)
     ]

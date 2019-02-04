@@ -71,72 +71,87 @@ std dev              73.04 μs   (8.910 μs .. 151.1 μs)
 variance introduced by outliers: 13% (moderately inflated)
 ```
 
-And now with a simple Array
+And now with a simple Array and folding
 ```
-cabal new-exec convolution +RTS -N4 -s
+jrp@cosmic:~/Projects/convolution$ cabal new-exec convolution +RTS -N4 -s
+Resolving dependencies...
 benchmarking Naive Convolution
-time                 2.292 ms   (2.216 ms .. 2.352 ms)
-                     0.989 R²   (0.980 R² .. 0.994 R²)
-mean                 2.894 ms   (2.705 ms .. 3.157 ms)
-std dev              768.4 μs   (569.8 μs .. 972.9 μs)
-variance introduced by outliers: 94% (severely inflated)
+time                 2.440 ms   (2.343 ms .. 2.525 ms)
+                     0.984 R²   (0.972 R² .. 0.992 R²)
+mean                 2.795 ms   (2.642 ms .. 3.001 ms)
+std dev              584.0 μs   (434.4 μs .. 720.8 μs)
+variance introduced by outliers: 90% (severely inflated)
 
 benchmarking Reduced Convolution
-time                 40.59 ms   (38.46 ms .. 41.80 ms)
-                     0.993 R²   (0.978 R² .. 0.999 R²)
-mean                 44.97 ms   (43.57 ms .. 47.22 ms)
-std dev              3.566 ms   (2.319 ms .. 5.382 ms)
-variance introduced by outliers: 27% (moderately inflated)
+time                 46.62 ms   (41.58 ms .. 53.92 ms)
+                     0.950 R²   (0.871 R² .. 0.999 R²)
+mean                 45.12 ms   (43.81 ms .. 49.20 ms)
+std dev              4.153 ms   (1.347 ms .. 7.864 ms)
+variance introduced by outliers: 34% (moderately inflated)
 
 benchmarking Parallelized Convolution
-time                 38.35 ms   (34.08 ms .. 43.17 ms)
-                     0.901 R²   (0.738 R² .. 0.984 R²)
-mean                 60.53 ms   (51.71 ms .. 72.76 ms)
-std dev              20.31 ms   (12.53 ms .. 28.73 ms)
-variance introduced by outliers: 91% (severely inflated)
+time                 42.88 ms   (39.56 ms .. 48.69 ms)
+                     0.938 R²   (0.856 R² .. 0.992 R²)
+mean                 54.93 ms   (49.05 ms .. 66.46 ms)
+std dev              14.19 ms   (7.286 ms .. 20.98 ms)
+variance introduced by outliers: 83% (severely inflated)
+
+benchmarking Direct Convolution (foldr)
+time                 672.0 ms   (536.3 ms .. 793.3 ms)
+                     0.993 R²   (0.992 R² .. 1.000 R²)
+mean                 729.8 ms   (698.1 ms .. 749.0 ms)
+std dev              31.92 ms   (13.41 ms .. 44.37 ms)
+variance introduced by outliers: 19% (moderately inflated)
+
+benchmarking Direct Convolution (foldl')
+time                 6.067 s    (3.703 s .. 7.762 s)
+                     0.983 R²   (0.941 R² .. 1.000 R²)
+mean                 6.590 s    (6.115 s .. 6.814 s)
+std dev              364.3 ms   (164.1 ms .. 464.2 ms)
+variance introduced by outliers: 19% (moderately inflated)
 
 benchmarking Vector Naive Convolution
-time                 4.519 ms   (3.845 ms .. 5.058 ms)
-                     0.917 R²   (0.890 R² .. 0.952 R²)
-mean                 4.022 ms   (3.820 ms .. 4.322 ms)
-std dev              715.5 μs   (499.1 μs .. 949.6 μs)
-variance introduced by outliers: 86% (severely inflated)
+time                 4.212 ms   (3.750 ms .. 4.819 ms)
+                     0.929 R²   (0.896 R² .. 0.986 R²)
+mean                 3.812 ms   (3.689 ms .. 4.022 ms)
+std dev              504.7 μs   (264.7 μs .. 766.8 μs)
+variance introduced by outliers: 77% (severely inflated)
 
 benchmarking Array Naive Convolution
-time                 31.23 ms   (28.17 ms .. 34.47 ms)
-                     0.948 R²   (0.889 R² .. 0.984 R²)
-mean                 41.49 ms   (37.52 ms .. 48.18 ms)
-std dev              10.12 ms   (7.093 ms .. 15.47 ms)
+time                 29.64 ms   (25.94 ms .. 31.78 ms)
+                     0.947 R²   (0.828 R² .. 0.994 R²)
+mean                 41.26 ms   (37.22 ms .. 46.08 ms)
+std dev              8.997 ms   (6.774 ms .. 10.83 ms)
 variance introduced by outliers: 79% (severely inflated)
 
-      98,965,168 bytes allocated in the heap
-      40,748,728 bytes copied during GC
-       9,861,296 bytes maximum residency (8 sample(s))
-         223,056 bytes maximum slop
-              23 MB total memory in use (0 MB lost due to fragmentation)
+   1,693,221,488 bytes allocated in the heap
+     738,621,488 bytes copied during GC
+      66,198,440 bytes maximum residency (29 sample(s))
+       2,416,776 bytes maximum slop
+             158 MB total memory in use (0 MB lost due to fragmentation)
 
                                      Tot time (elapsed)  Avg pause  Max pause
-  Gen  0        87 colls,    87 par    0.326s   0.081s     0.0009s    0.0135s
-  Gen  1         8 colls,     7 par    0.019s   0.005s     0.0006s    0.0010s
+  Gen  0      1583 colls,  1583 par    3.235s   0.825s     0.0005s    0.0436s
+  Gen  1        29 colls,    28 par    0.051s   0.014s     0.0005s    0.0011s
 
-  Parallel GC work balance: 14.63% (serial 0%, perfect 100%)
+  Parallel GC work balance: 11.94% (serial 0%, perfect 100%)
 
   TASKS: 10 (1 bound, 9 peak workers (9 total), using -N4)
 
   SPARKS: 0 (0 converted, 0 overflowed, 0 dud, 0 GC'd, 0 fizzled)
 
   INIT    time    0.003s  (  0.002s elapsed)
-  MUT     time    0.069s  ( 26.476s elapsed)
-  GC      time    0.345s  (  0.086s elapsed)
-  EXIT    time    0.001s  (  0.007s elapsed)
-  Total   time    0.418s  ( 26.571s elapsed)
+  MUT     time    1.041s  (143.141s elapsed)
+  GC      time    3.286s  (  0.839s elapsed)
+  EXIT    time    0.001s  (  0.009s elapsed)
+  Total   time    4.330s  (143.991s elapsed)
 
-  Alloc rate    1,430,954,250 bytes per MUT second
+  Alloc rate    1,626,957,914 bytes per MUT second
 
-  Productivity  16.7% of total user, 99.7% of total elapsed
+  Productivity  24.1% of total user, 99.4% of total elapsed
 
-gc_alloc_block_sync: 11818
+gc_alloc_block_sync: 37569
 whitehole_spin: 0
 gen[0].sync: 0
-gen[1].sync: 1977
+gen[1].sync: 28919
 ```
