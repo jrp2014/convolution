@@ -73,7 +73,7 @@ variance introduced by outliers: 13% (moderately inflated)
 
 And now with a simple Array and folding
 ```
-jrp@cosmic:~/Projects/convolution$ cabal new-exec convolution +RTS -N4 -s
+$ cabal new-exec convolution +RTS -N4 -s
 Resolving dependencies...
 benchmarking Naive Convolution
 time                 2.440 ms   (2.343 ms .. 2.525 ms)
