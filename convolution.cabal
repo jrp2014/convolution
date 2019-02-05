@@ -17,6 +17,11 @@ category:            Math
 extra-source-files:  CHANGELOG.md, README.md
 build-type:          Simple
 
+source-repository      head
+  type:                git
+  location:            https://github.com/jrp2014/convolution
+
+
 library
   exposed-modules:     Naive
   -- other-modules:
@@ -31,9 +36,11 @@ library
   ghc-options: -Wall -Wextra -Wincomplete-record-updates
                -Wincomplete-uni-patterns -Wredundant-constraints -Wcompat
                -O2 -fllvm
+               -- -fno-full-laziness
   default-language:    Haskell2010
 
-executable convolution
+benchmark              bench-convolution
+  type:                exitcode-stdio-1.0
   main-is:             Main.hs
   other-modules:       Naive
   -- other-extensions:
@@ -43,8 +50,9 @@ executable convolution
                        , vector
                        , criterion
                        , array
-  hs-source-dirs:      src
+  hs-source-dirs:      bench, src
   ghc-options: -Wall -Wextra -Wincomplete-record-updates
                -Wincomplete-uni-patterns -Wredundant-constraints -Wcompat
                -O2 -fllvm -threaded -rtsopts "-with-rtsopts=-N -s"
+               -- -fno-full-laziness
   default-language:    Haskell2010
