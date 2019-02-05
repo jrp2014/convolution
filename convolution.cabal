@@ -56,3 +56,25 @@ benchmark              bench-convolution
                -O2 -fllvm -threaded -rtsopts "-with-rtsopts=-N -s"
                -- -fno-full-laziness
   default-language:    Haskell2010
+
+test-suite             hspec-convolution
+  type:                exitcode-stdio-1.0
+  main-is:             Spec.hs
+  other-modules:       Naive, NaiveSpec
+  -- other-extensions:
+  build-tool-depends:  hspec-discover:hspec-discover
+  build-depends:         base ^>=4.12.0.0
+                       , containers ^>=0.6.0.1
+                       , parallel
+                       , vector
+                       , criterion
+                       , array
+                       , QuickCheck
+                       , hspec
+                       , hspec-core >= 2.5.0
+  hs-source-dirs:      test, src
+  ghc-options: -Wall -Wextra -Wincomplete-record-updates
+               -Wincomplete-uni-patterns -Wredundant-constraints -Wcompat
+               -O2 -fllvm -threaded -rtsopts "-with-rtsopts=-N"
+               -- -fno-full-laziness
+  default-language:    Haskell2010

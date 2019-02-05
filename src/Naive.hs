@@ -15,14 +15,13 @@ sum' = foldl' (+) 0
 convolve :: (Num a) => [a] -> [a] -> [a]
 convolve hs xs =
   let pad = replicate (length hs - 1) 0
-      ts = pad ++ xs
-   in roll ts (reverse hs)
+      ts  = pad ++ xs
+  in roll ts (reverse hs)
   where
     roll :: (Num a) => [a] -> [a] -> [a]
-    roll _ [] = []
-    roll hs ts =
-      let sample = sum' $ zipWith (*) ts hs
-       in sample : roll hs (tail ts)
+    roll _  [] = []
+    roll hs ts = let sample = sum $ zipWith (*) ts hs
+                 in sample : roll hs (tail ts)
 
 convolveV :: (Num a) => V.Vector a -> V.Vector a -> V.Vector a
 convolveV hs xs =
