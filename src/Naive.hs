@@ -7,7 +7,7 @@ import           Data.List                   (foldl', tails)
 import qualified Data.Map                    as M
 import qualified Data.Vector                 as V
 
--- this seems to be a bit faster than regular sum
+-- this seems to be a bit faster than regular sum in some cases
 sum' :: (Foldable t, Num a) => t a -> a
 sum' = foldl' (+) 0
 
@@ -44,7 +44,6 @@ convolveA x1 x2 =
     [ sum [x1 A.! k * x2 A.! (n - k) | k <- [max 0 (n - m2) .. min n m1]]
     | n <- [0 .. m3]
     ]
-        -- TODO::check whether bouds are correct
   where
     m1 = snd $ A.bounds x1
     m2 = snd $ A.bounds x2
