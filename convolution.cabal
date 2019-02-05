@@ -70,6 +70,7 @@ test-suite             hspec-convolution
                        , criterion
                        , array
                        , QuickCheck
+                       , quickcheck-instances
                        , hspec
                        , hspec-core >= 2.5.0
   hs-source-dirs:      test, src

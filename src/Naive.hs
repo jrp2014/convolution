@@ -1,11 +1,11 @@
 module Naive where
--- from https://www.blaenkdenum.com/posts/naive-convolution-in-haskell/
 
-import           Control.Parallel.Strategies
-import qualified Data.Array                  as A
-import           Data.List                   (foldl', tails)
-import qualified Data.Map                    as M
-import qualified Data.Vector                 as V
+-- from https://www.blaenkdenum.com/posts/naive-convolution-in-haskell/
+import Control.Parallel.Strategies
+import qualified Data.Array as A
+import Data.List (foldl', tails)
+import qualified Data.Map as M
+import qualified Data.Vector as V
 
 -- this seems to be a bit faster than regular sum in some cases
 sum' :: (Foldable t, Num a) => t a -> a
@@ -54,7 +54,7 @@ convolveR xs ys = map sum' $ foldr f [] xs
   where
     f x zs = foldr (g x) id ys ([] : zs)
     g x y a (z:zs) = ((x * y) : z) : a zs
-    g x y a []     = [x * y] : a []
+    g x y a [] = [x * y] : a []
 
 -- TODO:: refactor
 convolveL :: (Num a) => [a] -> [a] -> [a]
@@ -62,7 +62,7 @@ convolveL xs ys = map sum' $ foldl' (\h b x -> h (f b x)) id xs []
   where
     f x zs = foldl' (\h b y -> h (g x b y)) id ys id ([] : zs)
     g x y a (z:zs) = ((x * y) : z) : a zs
-    g x y a []     = [x * y] : a []
+    g x y a [] = [x * y] : a []
 
 convolve' :: (Num a) => [a] -> [a] -> [a]
 convolve' hs xs =
@@ -71,6 +71,7 @@ convolve' hs xs =
    in map (sum' . zipWith (*) (reverse hs)) (init $ tails ts)
 
 parConvolve :: (NFData a, Num a) => [a] -> [a] -> [a]
+parConvolve [] _ = []
 parConvolve hs xs =
   let pad = replicate (length hs - 1) 0
       ts = pad ++ xs
