@@ -1,6 +1,8 @@
 # convolution
 ## Experiments in convolution in haskell
 
+[![Travis Continuous Integration Status][https://secure.travis-ci.org/jrp2014/convolution.png?branch=master]][http://travis-ci.org/jrp2014/convolution]
+
 The starting point for this experiment is
 https://www.blaenkdenum.com/posts/naive-convolution-in-haskell/
 from 2013, corrected for a bug in the original.  The convolution functions
