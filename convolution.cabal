@@ -59,7 +59,7 @@ library
   -- other-modules:
   -- other-extensions:
 
-benchmark              all
+benchmark              bench-convolution
   import:              main
   type:                exitcode-stdio-1.0
   main-is:             Main.hs
