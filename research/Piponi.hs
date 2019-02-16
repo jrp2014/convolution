@@ -19,7 +19,7 @@ class Comonad w where
 iterate1 f x = tail $ iterate f x
 
 instance Comonad Zipper where
-  cobind f a = fmap f $ Zipper (iterate1 left a) (iterate right a)
+  cobind f a = f <$>  Zipper (iterate1 left a) (iterate right a)
   coreturn (Zipper _ (b:_)) = b
 
 a = Zipper (repeat 0) ([0, 1, 2, 3] ++ repeat 0)
