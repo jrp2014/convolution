@@ -1,14 +1,13 @@
 module Naive where
 
-import Control.Parallel.Strategies
-
 -- from https://www.blaenkdenum.com/posts/naive-convolution-in-haskell/
---
+import Control.Parallel.Strategies
+import qualified Data.Array as A
 import Data.List (foldl', tails)
 import qualified Data.Map as M
 import qualified Data.Vector as V
-import qualified Data.Array as A
 
+-- this seems to be a bit faster than regular sum in some cases
 sum' :: (Foldable t, Num a) => t a -> a
 sum' = foldl' (+) 0
 
@@ -16,7 +15,7 @@ convolve :: (Num a) => [a] -> [a] -> [a]
 convolve hs xs =
   let pad = replicate (length hs - 1) 0
       ts = pad ++ xs
-   in roll ts (reverse hs)
+   in roll (reverse hs) ts --  args wrong way around in the original
   where
     roll :: (Num a) => [a] -> [a] -> [a]
     roll _ [] = []
@@ -28,7 +27,7 @@ convolveV :: (Num a) => V.Vector a -> V.Vector a -> V.Vector a
 convolveV hs xs =
   let pad = V.replicate (V.length hs - 1) 0
       ts = (V.++) pad xs
-   in roll ts (V.reverse hs)
+   in roll (V.reverse hs) ts
   where
     roll :: (Num a) => V.Vector a -> V.Vector a -> V.Vector a
     roll hs ts
@@ -45,35 +44,58 @@ convolveA x1 x2 =
     [ sum [x1 A.! k * x2 A.! (n - k) | k <- [max 0 (n - m2) .. min n m1]]
     | n <- [0 .. m3]
     ]
-        -- TODO::check whether bouds are correct
   where
     m1 = snd $ A.bounds x1
     m2 = snd $ A.bounds x2
     m3 = m1 + m2
 
+convolveR :: (Num a) => [a] -> [a] -> [a]
+convolveR xs ys = map sum' $ foldr f [] xs
+  where
+    f x zs = foldr (g x) id ys ([] : zs)
+    g x y a (z:zs) = ((x * y) : z) : a zs
+    g x y a [] = [x * y] : a []
+
+-- TODO:: refactor
+convolveL :: (Num a) => [a] -> [a] -> [a]
+convolveL xs ys = map sum' $ foldl' (\h b x -> h (f b x)) id xs []
+  where
+    f x zs = foldl' (\h b y -> h (g x b y)) id ys id ([] : zs)
+    g x y a (z:zs) = ((x * y) : z) : a zs
+    g x y a [] = [x * y] : a []
+
 convolve' :: (Num a) => [a] -> [a] -> [a]
 convolve' hs xs =
   let pad = replicate (length hs - 1) 0
       ts = pad ++ xs
-   in map (sum . zipWith (*) (reverse hs)) (init $ tails ts)
+   in map (sum' . zipWith (*) (reverse hs)) (init $ tails ts)
 
 parConvolve :: (NFData a, Num a) => [a] -> [a] -> [a]
+parConvolve [] _ = []
 parConvolve hs xs =
   let pad = replicate (length hs - 1) 0
       ts = pad ++ xs
-   in parMap rdeepseq (sum . zipWith (*) (reverse hs)) (init $ tails ts)
+   in parMap rdeepseq (sum' . zipWith (*) (reverse hs)) (init $ tails ts)
 
 data ConvType
   = Naive
   | Reduced
   | Parallel
+  | DirectR
+  | DirectL
   | VectorNaive
   | ArrayNaive
   deriving (Eq, Ord)
 
 convTypes :: M.Map ConvType ([Int] -> [Int] -> [Int])
 convTypes =
-  M.fromList [(Naive, convolve), (Reduced, convolve'), (Parallel, parConvolve)]
+  M.fromList
+    [ (Naive, convolve)
+    , (Reduced, convolve')
+    , (Parallel, parConvolve)
+    , (DirectR, convolveR)
+    , (DirectL, convolveL)
+    ]
 
 convVTypes :: M.Map ConvType (V.Vector Int -> V.Vector Int -> V.Vector Int)
 convVTypes = M.fromList [(VectorNaive, convolveV)]
