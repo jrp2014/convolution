@@ -35,3 +35,12 @@ movingAvg n = extend (average n)
 convolve :: Num a => Stream a -> Stream a -> Stream a
 convolve s t =
   S.head s * S.head t <:> S.repeat (S.head s) * S.tail t + convolve (S.tail s) t
+
+-- s and t must be of the same length
+
+-- convolve' [1,2,3,4,0,0,0,0] [1,2,3,4,5,0,0,0] == [1,4,10,20,30,34,31,20]
+-- works with infinite lists; needs to be padded for finite ones
+convolve' :: Num a => [a] -> [a] -> [a]
+convolve' (hs:ts) t@(ht:tt) = hs * ht : zipWith (+) (zipWith (*) (repeat hs) tt) 
+                                                    (convolve' ts t)
+
