@@ -18,6 +18,7 @@ main =
     , bench "Direct Convolution (foldl')" (runConv DirectL)
     , bench "Vector Naive Convolution" (runConvV VectorNaive)
     , bench "Array Naive Convolution" (runConvA ArrayNaive)
+    , bench "Stream Naive Convolution" (runConv StreamNaive)
     ]
   where
     runConv ctype =

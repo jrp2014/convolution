@@ -77,6 +77,18 @@ parConvolve hs xs =
       ts = pad ++ xs
    in parMap rdeepseq (sum' . zipWith (*) (reverse hs)) (init $ tails ts)
 
+-- s and t must be of the same length
+-- convolve' [1,2,3,4,0,0,0,0] [1,2,3,4,5,0,0,0] == [1,4,10,20,30,34,31,20]
+-- works with infinite lists; needs to be padded for finite ones
+convolveS :: Num a => [a] -> [a] -> [a]
+convolveS s t = convolveS' (s ++ replicate (ll - ls) 0) (t ++ replicate (ll - lt) 0)
+  where
+    ls = length s
+    lt = length t
+    ll = ls + lt - 1
+    convolveS' (hs:ts) t'@(ht:tt) =
+      hs * ht : zipWith (+) (map (hs *) tt) (convolveS' ts t')
+
 data ConvType
   = Naive
   | Reduced
@@ -85,6 +97,7 @@ data ConvType
   | DirectL
   | VectorNaive
   | ArrayNaive
+  | StreamNaive
   deriving (Eq, Ord)
 
 convTypes :: M.Map ConvType ([Int] -> [Int] -> [Int])
@@ -95,6 +108,7 @@ convTypes =
     , (Parallel, parConvolve)
     , (DirectR, convolveR)
     , (DirectL, convolveL)
+    , (StreamNaive, convolveS)
     ]
 
 convVTypes :: M.Map ConvType (V.Vector Int -> V.Vector Int -> V.Vector Int)
