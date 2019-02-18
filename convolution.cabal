@@ -16,66 +16,66 @@ author:              jrp2014
 category:            Math
 extra-source-files:  CHANGELOG.md, README.md
 build-type:          Simple
+tested-with:         GHC == 8.6.3, GHC == 8.4.4, GHC == 8.2.2, GHC == 8.0.2,
+                     GHC == 7.10.3
 
 source-repository      head
   type:                git
   location:            https://github.com/jrp2014/convolution
 
+flag LLVM
+  default:             False
+  description: Use LLVM build for better performance
 
-library
-  exposed-modules:     Naive
-  -- other-modules:
-  -- other-extensions:
-  build-depends:         base ^>=4.12.0.0
-                       , containers ^>=0.6.0.1
+common base
+  build-depends:         base >= 4.8.0.0 && < 5
+                       , containers
                        , criterion
                        , vector
                        , parallel
                        , array
   hs-source-dirs:      src
-  ghc-options: -Wall -Wextra -Wincomplete-record-updates
-               -Wincomplete-uni-patterns -Wredundant-constraints -Wcompat
-               -O2 -fllvm
-               -- -fno-full-laziness
+  if flag (LLVM)
+    ghc-options: -Wall -Wextra -Wincomplete-record-updates
+                 -Wincomplete-uni-patterns -Wredundant-constraints -Wcompat
+                 -O2 -fllvm
+  else
+    ghc-options: -Wall -Wextra -Wincomplete-record-updates
+                 -Wincomplete-uni-patterns -Wredundant-constraints -Wcompat
+                 -O2
+
   default-language:    Haskell2010
 
+common main
+  import:              base
+  ghc-options:         -threaded -rtsopts "-with-rtsopts=-N"
+  
+
+
+library
+  import:              base
+  exposed-modules:     Naive
+  hs-source-dirs:      src
+  -- other-modules:
+  -- other-extensions:
+
 benchmark              bench-convolution
+  import:              main
   type:                exitcode-stdio-1.0
   main-is:             Main.hs
   other-modules:       Naive
-  -- other-extensions:
-  build-depends:         base ^>=4.12.0.0
-                       , containers ^>=0.6.0.1
-                       , parallel
-                       , vector
-                       , criterion
-                       , array
   hs-source-dirs:      bench, src
-  ghc-options: -Wall -Wextra -Wincomplete-record-updates
-               -Wincomplete-uni-patterns -Wredundant-constraints -Wcompat
-               -O2 -fllvm -threaded -rtsopts "-with-rtsopts=-N -s"
-               -- -fno-full-laziness
-  default-language:    Haskell2010
+  -- other-extensions:
 
 test-suite             hspec-convolution
+  import:              main
   type:                exitcode-stdio-1.0
   main-is:             Spec.hs
   other-modules:       Naive, NaiveSpec
   -- other-extensions:
   build-tool-depends:  hspec-discover:hspec-discover
-  build-depends:         base ^>=4.12.0.0
-                       , containers ^>=0.6.0.1
-                       , parallel
-                       , vector
-                       , criterion
-                       , array
-                       , QuickCheck
+  build-depends:         QuickCheck
                        , quickcheck-instances
                        , hspec
-                       , hspec-core >= 2.5.0
+                       , hspec-core
   hs-source-dirs:      test, src
-  ghc-options: -Wall -Wextra -Wincomplete-record-updates
-               -Wincomplete-uni-patterns -Wredundant-constraints -Wcompat
-               -O2 -fllvm -threaded -rtsopts "-with-rtsopts=-N"
-               -- -fno-full-laziness
-  default-language:    Haskell2010

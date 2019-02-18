@@ -1,8 +1,14 @@
 # convolution
 ## Experiments in convolution in haskell
 
-The starting point for this experiment is https://www.blaenkdenum.com/posts/naive-convolution-in-haskell/
-from 2013.  Note that the `stream-fusion` package is no longer available.
+[![Build Status](https://travis-ci.com/jrp2014/convolution.svg?branch=master)](https://travis-ci.com/jrp2014/convolution)
+
+The starting point for this experiment is
+https://www.blaenkdenum.com/posts/naive-convolution-in-haskell/
+from 2013, corrected for a bug in the original.  The convolution functions
+produce inconsistent results when given empty parameters (where the result is
+undefined).
+Note that the `stream-fusion` package is no longer available.
 
 ```
 Running 1 benchmarks...
