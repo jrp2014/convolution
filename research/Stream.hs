@@ -4,8 +4,6 @@ module Stream where
 --
 import qualified Data.Stream                   as S
 import           Data.Stream                    ( Stream(..)
-                                                , (<:>)
-                                                )
 
 import           Control.Comonad
 
@@ -48,6 +46,7 @@ conv s t = conv' (s ++ replicate (ll - ls) 0) (t ++ replicate (ll - lt) 0)
   ll = ls + lt - 1
 
 conv' :: Num a => [a] -> [a] -> [a]
+<<<<<<< HEAD
 conv' (hs : ts) t'@(ht : tt) =
   hs * ht : zipWith (+) (map (hs *) tt) (conv' ts t')
 
@@ -80,3 +79,32 @@ g =
   , -43
   , -7
   ]
+
+conv' (hs:ts) t'@(ht:tt) = hs * ht : zipWith (+) (map (hs *) tt) (conv' ts t')
+
+convolutel ::
+     (a -> b -> c) -> (c -> c -> c) -> (Stream a -> Stream b -> Stream c)
+convolutel times plus s t =
+  S.head s `times` S.head t <:>
+  S.zipWith
+    plus
+    (S.map (`times` S.head t) (S.tail s))
+    (convolutel times plus s (S.tail t))
+
+convoluter ::
+     (a -> b -> c) -> (c -> c -> c) -> (Stream a -> Stream b -> Stream c)
+convoluter times plus s t =
+  S.head s `times` S.head t <:>
+  S.zipWith
+    plus
+    (convoluter times plus (S.tail s) t)
+    (S.map (S.head s `times`) (S.tail t))
+
+infixl 7 **
+(**) :: Num c => Stream c -> Stream c -> Stream c
+s ** t = convoluter(*)(+)s t
+
+infixr 8 ^^
+(^^) :: (Integral b, Num c) => Stream c -> Stream b -> Stream c
+s ^^ t = convoluter(^)(*)s t
+

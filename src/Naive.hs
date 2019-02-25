@@ -1,8 +1,10 @@
+{-# LANGUAGE BangPatterns #-}
 module Naive where
 
 -- from https://www.blaenkdenum.com/posts/naive-convolution-in-haskell/
 import Control.Parallel.Strategies
 import qualified Data.Array as A
+
 import Data.List (foldl', tails)
 import qualified Data.Map as M
 import qualified Data.Vector as V
@@ -11,7 +13,12 @@ import qualified Data.Vector as V
 sum' :: (Foldable t, Num a) => t a -> a
 sum' = foldl' (+) 0
 
-convolve :: (Num a) => [a] -> [a] -> [a]
+dotp :: Num a => [a] -> [a] -> a
+dotp = go 0
+  where
+    go !acc (x:xs) (y:ys) = go (acc + x * y) xs ys
+    go !acc _      _      = acc
+
 convolve hs xs =
   let pad = replicate (length hs - 1) 0
       ts = pad ++ xs
@@ -21,6 +28,7 @@ convolve hs xs =
     roll _ [] = []
     roll hs ts =
       let sample = sum' $ zipWith (*) ts hs
+      --let sample = dotp ts hs
        in sample : roll hs (tail ts)
 
 convolveV :: (Num a) => V.Vector a -> V.Vector a -> V.Vector a
