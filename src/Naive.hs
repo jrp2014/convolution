@@ -13,6 +13,12 @@ import qualified Data.Vector as V
 sum' :: (Foldable t, Num a) => t a -> a
 sum' = foldl' (+) 0
 
+-- | Zips together two lists using a function,
+-- and evaluates the result list in parallel.
+-- -- [V slow)
+parZipWith :: Strategy c -> (a -> b -> c) -> [a] -> [b] -> [c]
+parZipWith strat z as bs = zipWith z as bs `using` parList strat
+
 dotp :: Num a => [a] -> [a] -> a
 dotp = go 0
   where
@@ -28,6 +34,7 @@ dotp' u v = loop 0 0 0
         | i<n && j< m = loop (z+u V.!i * v V.!j) (i+1) (j+1)
         | otherwise = z
 
+convolve :: (Num a) => [a] -> [a] -> [a]
 convolve hs xs =
   let pad = replicate (length hs - 1) 0
       ts = pad ++ xs
