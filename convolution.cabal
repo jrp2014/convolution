@@ -24,7 +24,7 @@ source-repository      head
   location:            https://github.com/jrp2014/convolution
 
 flag LLVM
-  default:             True
+  default:             False
   description: Use LLVM build for better performance
 
 common base

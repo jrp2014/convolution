@@ -19,6 +19,15 @@ dotp = go 0
     go !acc (x:xs) (y:ys) = go (acc + x * y) xs ys
     go !acc _      _      = acc
 
+dotp' :: Num p => V.Vector p -> V.Vector p -> p
+dotp' u v = loop 0 0 0
+  where
+    m = V.length u
+    n = V.length v
+    loop z i j
+        | i<n && j< m = loop (z+u V.!i * v V.!j) (i+1) (j+1)
+        | otherwise = z
+
 convolve hs xs =
   let pad = replicate (length hs - 1) 0
       ts = pad ++ xs
@@ -44,15 +53,6 @@ convolveV hs xs =
         --let sample = dotp ts hs -- is no faster then the  clearer version
         let sample = V.sum $ V.zipWith (*) ts hs
          in V.cons sample (roll hs (V.tail ts))
-
-dotp :: Num p => V.Vector p -> V.Vector p -> p
-dotp u v = loop 0 0 0
-  where
-    m = V.length u
-    n = V.length v
-    loop z i j
-        | i<n && j< m = loop (z+u V.!i * v V.!j) (i+1) (j+1)
-        | otherwise = z
 
 convolveA ::
      (A.Ix a, Integral a, Num b) => A.Array a b -> A.Array a b -> A.Array a b
