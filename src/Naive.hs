@@ -8,6 +8,7 @@ import qualified Data.Array as A
 import Data.List (foldl', tails)
 import qualified Data.Map as M
 import qualified Data.Vector as V
+import qualified Data.Vector.Unboxed as U
 
 -- this seems to be a bit faster than regular sum in some cases
 sum' :: (Foldable t, Num a) => t a -> a
@@ -60,6 +61,20 @@ convolveV hs xs =
         --let sample = dotp ts hs -- is no faster then the  clearer version
         let sample = V.sum $ V.zipWith (*) ts hs
          in V.cons sample (roll hs (V.tail ts))
+
+convolveU :: (Num a, U.Unbox a) => U.Vector a -> U.Vector a -> U.Vector a
+convolveU hs xs =
+  let pad = U.replicate (U.length hs - 1) 0
+      ts = (U.++) pad xs
+   in roll (U.reverse hs) ts
+  where
+    roll :: (Num a, U.Unbox a) => U.Vector a -> U.Vector a -> U.Vector a
+    roll hs ts
+      | U.null ts = U.empty
+      | otherwise =
+        --let sample = dotp ts hs -- is no faster then the  clearer version
+        let sample = U.sum $ U.zipWith (*) ts hs
+         in U.cons sample (roll hs (U.tail ts))
 
 convolveA ::
      (A.Ix a, Integral a, Num b) => A.Array a b -> A.Array a b -> A.Array a b
@@ -121,6 +136,7 @@ data ConvType
   | DirectR
   | DirectL
   | VectorNaive
+  | UnboxedVectorNaive
   | ArrayNaive
   | StreamNaive
   deriving (Eq, Ord)
@@ -138,6 +154,9 @@ convTypes =
 
 convVTypes :: M.Map ConvType (V.Vector Int -> V.Vector Int -> V.Vector Int)
 convVTypes = M.fromList [(VectorNaive, convolveV)]
+
+convUTypes :: M.Map ConvType (U.Vector Int -> U.Vector Int -> U.Vector Int)
+convUTypes = M.fromList [(UnboxedVectorNaive, convolveU)]
 
 convATypes ::
      M.Map ConvType (A.Array Int Int -> A.Array Int Int -> A.Array Int Int)

@@ -10,6 +10,7 @@ import Test.QuickCheck.Instances.Vector ()
 
 import qualified Data.Array as A
 import qualified Data.Vector as V
+import qualified Data.Vector.Unboxed as U
 
 -- Don't use the quickcheck-instances version, as it picks arbitrary bounds
 --  rather than indexing from zero
@@ -47,6 +48,9 @@ spec = do
     it ("convolves " ++ show hs ++ " with " ++ show xs ++ " using convolveV") $
       convolveV (V.fromList hs) (V.fromList xs) `shouldBe`
       V.fromList hxs
+    it ("convolves " ++ show hs ++ " with " ++ show xs ++ " using convolveU") $
+      convolveU (U.fromList hs) (U.fromList xs) `shouldBe`
+      U.fromList hxs
     it ("convolves " ++ show hs ++ " with " ++ show xs ++ " using convolveA") $
       convolveA hsA xsA `shouldBe`
       hxsA
@@ -74,6 +78,10 @@ spec = do
       not (V.null pxs) && not (V.null phs) ==>
       convolveV (pxs :: V.Vector Int) (phs :: V.Vector Int) ==
       convolveV phs pxs
+    it "of convolveU" $ property $ \pxs phs ->
+      not (U.null pxs) && not (U.null phs) ==>
+      convolveU (pxs :: U.Vector Int) (phs :: U.Vector Int) ==
+      convolveU phs pxs
     it "of convolveA" $ property $ \pxs phs ->
       let (_, u) = A.bounds pxs
           (_, u') = A.bounds phs
