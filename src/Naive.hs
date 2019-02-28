@@ -1,5 +1,6 @@
 {-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE FlexibleContexts #-}
+
 module Naive where
 
 -- from https://www.blaenkdenum.com/posts/naive-convolution-in-haskell/
@@ -26,7 +27,7 @@ dotp :: Num a => [a] -> [a] -> a
 dotp = go 0
   where
     go !acc (x:xs) (y:ys) = go (acc + x * y) xs ys
-    go !acc _      _      = acc
+    go !acc _ _ = acc
 
 dotp' :: Num p => V.Vector p -> V.Vector p -> p
 dotp' u v = loop 0 0 0
@@ -34,8 +35,8 @@ dotp' u v = loop 0 0 0
     m = V.length u
     n = V.length v
     loop z i j
-        | i<n && j< m = loop (z+u V.!i * v V.!j) (i+1) (j+1)
-        | otherwise = z
+      | i < n && j < m = loop (z + u V.! i * v V.! j) (i + 1) (j + 1)
+      | otherwise = z
 
 convolve :: (Num a) => [a] -> [a] -> [a]
 convolve hs xs =
@@ -47,7 +48,7 @@ convolve hs xs =
     roll _ [] = []
     roll hs ts =
       let sample = sum' $ zipWith (*) ts hs
-      --let sample = dotp ts hs
+    --let sample = dotp ts hs
        in sample : roll hs (tail ts)
 
 convolve' :: (Num a) => [a] -> [a] -> [a]
@@ -65,8 +66,9 @@ convolveV hs xs =
     roll :: (Num a) => V.Vector a -> V.Vector a -> V.Vector a
     roll hs ts
       | V.null ts = V.empty
-      | otherwise =
-        --let sample = dotp ts hs -- is no faster then the  clearer version
+      | otherwise
+      --let sample = dotp ts hs -- is no faster then the  clearer version
+       =
         let sample = V.sum $ V.zipWith (*) ts hs
          in V.cons sample (roll hs (V.tail ts))
 
@@ -79,8 +81,9 @@ convolveUV hs xs =
     roll :: (Num a, UV.Unbox a) => UV.Vector a -> UV.Vector a -> UV.Vector a
     roll hs ts
       | UV.null ts = UV.empty
-      | otherwise =
-        --let sample = dotp ts hs -- is no faster then the  clearer version
+      | otherwise
+      --let sample = dotp ts hs -- is no faster then the  clearer version
+       =
         let sample = UV.sum $ UV.zipWith (*) ts hs
          in UV.cons sample (roll hs (UV.tail ts))
 
@@ -98,7 +101,10 @@ convolveA x1 x2 =
     m3 = m1 + m2
 
 convolveUA ::
-     (UA.Ix a, Integral a, Num b, UA.IArray UA.UArray b) => UA.UArray a b -> UA.UArray a b -> UA.UArray a b
+     (UA.Ix a, Integral a, Num b, UA.IArray UA.UArray b)
+  => UA.UArray a b
+  -> UA.UArray a b
+  -> UA.UArray a b
 convolveUA x1 x2 =
   UA.listArray
     (0, m3)
@@ -136,14 +142,14 @@ parConvolve hs xs =
 -- convolve' [1,2,3,4,0,0,0,0] [1,2,3,4,5,0,0,0] == [1,4,10,20,30,34,31,20]
 -- works with infinite lists; needs to be padded for finite ones
 convolveS :: Num a => [a] -> [a] -> [a]
-convolveS s t = convolveS' (s ++ replicate (ll - ls) 0) (t ++ replicate (ll - lt) 0)
+convolveS s t =
+  convolveS' (s ++ replicate (ll - ls) 0) (t ++ replicate (ll - lt) 0)
   where
     ls = length s
     lt = length t
     ll = ls + lt - 1
     convolveS' (hs:ts) t'@(ht:tt) =
       hs * ht : zipWith (+) (map (hs *) tt) (convolveS' ts t')
-
 
 data ConvType
   = Naive
@@ -182,4 +188,3 @@ convATypes = M.fromList [(ArrayNaive, convolveA)]
 convUATypes ::
      M.Map ConvType (UA.UArray Int Int -> UA.UArray Int Int -> UA.UArray Int Int)
 convUATypes = M.fromList [(UnboxedArrayNaive, convolveUA)]
-
