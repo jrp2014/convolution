@@ -1,14 +1,16 @@
 {-# LANGUAGE BangPatterns #-}
+{-# LANGUAGE FlexibleContexts #-}
 module Naive where
 
 -- from https://www.blaenkdenum.com/posts/naive-convolution-in-haskell/
 import Control.Parallel.Strategies
 import qualified Data.Array as A
+import qualified Data.Array.Unboxed as UA
 
 import Data.List (foldl', tails)
 import qualified Data.Map as M
 import qualified Data.Vector as V
-import qualified Data.Vector.Unboxed as U
+import qualified Data.Vector.Unboxed as UV
 
 -- this seems to be a bit faster than regular sum in some cases
 sum' :: (Foldable t, Num a) => t a -> a
@@ -48,6 +50,12 @@ convolve hs xs =
       --let sample = dotp ts hs
        in sample : roll hs (tail ts)
 
+convolve' :: (Num a) => [a] -> [a] -> [a]
+convolve' hs xs =
+  let pad = replicate (length hs - 1) 0
+      ts = pad ++ xs
+   in map (sum' . zipWith (*) (reverse hs)) (init $ tails ts)
+
 convolveV :: (Num a) => V.Vector a -> V.Vector a -> V.Vector a
 convolveV hs xs =
   let pad = V.replicate (V.length hs - 1) 0
@@ -62,19 +70,19 @@ convolveV hs xs =
         let sample = V.sum $ V.zipWith (*) ts hs
          in V.cons sample (roll hs (V.tail ts))
 
-convolveU :: (Num a, U.Unbox a) => U.Vector a -> U.Vector a -> U.Vector a
-convolveU hs xs =
-  let pad = U.replicate (U.length hs - 1) 0
-      ts = (U.++) pad xs
-   in roll (U.reverse hs) ts
+convolveUV :: (Num a, UV.Unbox a) => UV.Vector a -> UV.Vector a -> UV.Vector a
+convolveUV hs xs =
+  let pad = UV.replicate (UV.length hs - 1) 0
+      ts = (UV.++) pad xs
+   in roll (UV.reverse hs) ts
   where
-    roll :: (Num a, U.Unbox a) => U.Vector a -> U.Vector a -> U.Vector a
+    roll :: (Num a, UV.Unbox a) => UV.Vector a -> UV.Vector a -> UV.Vector a
     roll hs ts
-      | U.null ts = U.empty
+      | UV.null ts = UV.empty
       | otherwise =
         --let sample = dotp ts hs -- is no faster then the  clearer version
-        let sample = U.sum $ U.zipWith (*) ts hs
-         in U.cons sample (roll hs (U.tail ts))
+        let sample = UV.sum $ UV.zipWith (*) ts hs
+         in UV.cons sample (roll hs (UV.tail ts))
 
 convolveA ::
      (A.Ix a, Integral a, Num b) => A.Array a b -> A.Array a b -> A.Array a b
@@ -87,6 +95,19 @@ convolveA x1 x2 =
   where
     m1 = snd $ A.bounds x1
     m2 = snd $ A.bounds x2
+    m3 = m1 + m2
+
+convolveUA ::
+     (UA.Ix a, Integral a, Num b, UA.IArray UA.UArray b) => UA.UArray a b -> UA.UArray a b -> UA.UArray a b
+convolveUA x1 x2 =
+  UA.listArray
+    (0, m3)
+    [ sum [x1 UA.! k * x2 UA.! (n - k) | k <- [max 0 (n - m2) .. min n m1]]
+    | n <- [0 .. m3]
+    ]
+  where
+    m1 = snd $ UA.bounds x1
+    m2 = snd $ UA.bounds x2
     m3 = m1 + m2
 
 convolveR :: (Num a) => [a] -> [a] -> [a]
@@ -103,12 +124,6 @@ convolveL xs ys = map sum' $ foldl' (\h b x -> h (f b x)) id xs []
     f x zs = foldl' (\h b y -> h (g x b y)) id ys id ([] : zs)
     g x y a (z:zs) = ((x * y) : z) : a zs
     g x y a [] = [x * y] : a []
-
-convolve' :: (Num a) => [a] -> [a] -> [a]
-convolve' hs xs =
-  let pad = replicate (length hs - 1) 0
-      ts = pad ++ xs
-   in map (sum' . zipWith (*) (reverse hs)) (init $ tails ts)
 
 parConvolve :: (NFData a, Num a) => [a] -> [a] -> [a]
 parConvolve [] _ = []
@@ -129,6 +144,7 @@ convolveS s t = convolveS' (s ++ replicate (ll - ls) 0) (t ++ replicate (ll - lt
     convolveS' (hs:ts) t'@(ht:tt) =
       hs * ht : zipWith (+) (map (hs *) tt) (convolveS' ts t')
 
+
 data ConvType
   = Naive
   | Reduced
@@ -138,6 +154,7 @@ data ConvType
   | VectorNaive
   | UnboxedVectorNaive
   | ArrayNaive
+  | UnboxedArrayNaive
   | StreamNaive
   deriving (Eq, Ord)
 
@@ -155,9 +172,14 @@ convTypes =
 convVTypes :: M.Map ConvType (V.Vector Int -> V.Vector Int -> V.Vector Int)
 convVTypes = M.fromList [(VectorNaive, convolveV)]
 
-convUTypes :: M.Map ConvType (U.Vector Int -> U.Vector Int -> U.Vector Int)
-convUTypes = M.fromList [(UnboxedVectorNaive, convolveU)]
+convUTypes :: M.Map ConvType (UV.Vector Int -> UV.Vector Int -> UV.Vector Int)
+convUTypes = M.fromList [(UnboxedVectorNaive, convolveUV)]
 
 convATypes ::
      M.Map ConvType (A.Array Int Int -> A.Array Int Int -> A.Array Int Int)
 convATypes = M.fromList [(ArrayNaive, convolveA)]
+
+convUATypes ::
+     M.Map ConvType (UA.UArray Int Int -> UA.UArray Int Int -> UA.UArray Int Int)
+convUATypes = M.fromList [(UnboxedArrayNaive, convolveUA)]
+

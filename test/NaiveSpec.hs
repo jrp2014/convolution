@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleContexts #-}
 module NaiveSpec
   ( spec
   ) where
@@ -9,8 +10,9 @@ import Test.QuickCheck
 import Test.QuickCheck.Instances.Vector ()
 
 import qualified Data.Array as A
+import qualified Data.Array.Unboxed as UA
 import qualified Data.Vector as V
-import qualified Data.Vector.Unboxed as U
+import qualified Data.Vector.Unboxed as UV
 
 -- Don't use the quickcheck-instances version, as it picks arbitrary bounds
 --  rather than indexing from zero
@@ -20,6 +22,13 @@ instance (A.Ix a, Integral a, Arbitrary b) => Arbitrary (A.Array a b) where
 
 instance (CoArbitrary b) => CoArbitrary (A.Array a b) where
   coarbitrary = coarbitrary . A.elems
+
+instance (UA.Ix i, Integral i, UA.IArray UA.UArray a, Arbitrary a) => Arbitrary (UA.UArray i a) where
+    arbitrary =
+     (\x -> UA.listArray (0, fromIntegral (length x - 1)) x) <$> arbitrary
+
+instance (UA.Ix i, UA.IArray UA.UArray a, CoArbitrary a) => CoArbitrary (UA.UArray i a) where
+    coarbitrary = coarbitrary . UA.elems
 
 hs :: [Int]
 hs = [1, 2, 3, 4, 5]
@@ -39,6 +48,15 @@ xsA = A.listArray (0, length xs - 1) xs
 hxsA :: A.Array Int Int
 hxsA = A.listArray (0, length hxs - 1) hxs
 
+hsUA :: UA.UArray Int Int
+hsUA = UA.listArray (0, length hs - 1) hs
+
+xsUA :: UA.UArray Int Int
+xsUA = UA.listArray (0, length xs - 1) xs
+
+hxsUA :: UA.UArray Int Int
+hxsUA = UA.listArray (0, length hxs - 1) hxs
+
 spec :: Spec
 spec = do
   describe "Basic" $ do
@@ -48,12 +66,15 @@ spec = do
     it ("convolves " ++ show hs ++ " with " ++ show xs ++ " using convolveV") $
       convolveV (V.fromList hs) (V.fromList xs) `shouldBe`
       V.fromList hxs
-    it ("convolves " ++ show hs ++ " with " ++ show xs ++ " using convolveU") $
-      convolveU (U.fromList hs) (U.fromList xs) `shouldBe`
-      U.fromList hxs
+    it ("convolves " ++ show hs ++ " with " ++ show xs ++ " using convolveUV") $
+      convolveUV (UV.fromList hs) (UV.fromList xs) `shouldBe`
+      UV.fromList hxs
     it ("convolves " ++ show hs ++ " with " ++ show xs ++ " using convolveA") $
       convolveA hsA xsA `shouldBe`
       hxsA
+    it ("convolves " ++ show hs ++ " with " ++ show xs ++ " using convolveUA") $
+      convolveUA hsUA xsUA `shouldBe`
+      hxsUA
     it ("convolves " ++ show hs ++ " with " ++ show xs ++ " using convolveR") $
       convolveR hs xs `shouldBe`
       hxs
@@ -78,16 +99,22 @@ spec = do
       not (V.null pxs) && not (V.null phs) ==>
       convolveV (pxs :: V.Vector Int) (phs :: V.Vector Int) ==
       convolveV phs pxs
-    it "of convolveU" $ property $ \pxs phs ->
-      not (U.null pxs) && not (U.null phs) ==>
-      convolveU (pxs :: U.Vector Int) (phs :: U.Vector Int) ==
-      convolveU phs pxs
+    it "of convolveUV" $ property $ \pxs phs ->
+      not (UV.null pxs) && not (UV.null phs) ==>
+      convolveUV (pxs :: UV.Vector Int) (phs :: UV.Vector Int) ==
+      convolveUV phs pxs
     it "of convolveA" $ property $ \pxs phs ->
       let (_, u) = A.bounds pxs
           (_, u') = A.bounds phs
        in 0 < u && 0 < u' ==>
           convolveA (pxs :: A.Array Int Int) (phs :: A.Array Int Int) ==
           convolveA phs pxs
+    it "of convolveUA" $ property $ \pxs phs ->
+      let (_, u) = UA.bounds pxs
+          (_, u') = UA.bounds phs
+       in 0 < u && 0 < u' ==>
+          convolveUA (pxs :: UA.UArray Int Int) (phs :: UA.UArray Int Int) ==
+          convolveUA phs pxs
     it "of convolveR" $ property $ \pxs phs ->
       not (null pxs) && not (null phs) ==>
       convolveR (pxs :: [Int]) (phs :: [Int]) ==
