@@ -14,78 +14,105 @@ Note that the `stream-fusion` package is no longer available.
 Running 1 benchmarks...
 Benchmark bench-convolution: RUNNING...
 benchmarking Naive Convolution
-time                 53.75 ms   (40.59 ms .. 69.58 ms)
-                     0.865 R²   (0.765 R² .. 0.989 R²)
-mean                 55.17 ms   (49.59 ms .. 64.50 ms)
-std dev              13.21 ms   (8.991 ms .. 17.54 ms)
-variance introduced by outliers: 76% (severely inflated)
+time                 35.19 ms   (33.82 ms .. 36.71 ms)
+                     0.996 R²   (0.993 R² .. 0.998 R²)
+mean                 36.75 ms   (36.27 ms .. 37.44 ms)
+std dev              1.276 ms   (911.8 μs .. 1.889 ms)
+variance introduced by outliers: 11% (moderately inflated)
 
-benchmarking Reduced Convolution
-time                 43.01 ms   (42.28 ms .. 43.72 ms)
-                     0.999 R²   (0.998 R² .. 1.000 R²)
-mean                 44.14 ms   (43.68 ms .. 44.59 ms)
-std dev              902.7 μs   (656.2 μs .. 1.272 ms)
-
-benchmarking Parallelized Convolution
-time                 23.30 ms   (22.72 ms .. 23.95 ms)
-                     0.997 R²   (0.993 R² .. 0.999 R²)
-mean                 23.64 ms   (23.37 ms .. 24.36 ms)
-std dev              944.2 μs   (511.3 μs .. 1.580 ms)
-variance introduced by outliers: 14% (moderately inflated)
-
-benchmarking Direct Convolution (foldr)
-time                 567.8 ms   (358.9 ms .. 812.5 ms)
-                     0.979 R²   (0.930 R² .. 1.000 R²)
-mean                 673.9 ms   (619.3 ms .. 721.2 ms)
-std dev              65.75 ms   (32.88 ms .. 79.47 ms)
-variance introduced by outliers: 22% (moderately inflated)
-
-benchmarking Direct Convolution (foldl')
-time                 4.679 s    (4.384 s .. 5.041 s)
-                     0.999 R²   (0.999 R² .. 1.000 R²)
-mean                 5.038 s    (4.861 s .. 5.354 s)
-std dev              306.1 ms   (29.77 ms .. 379.9 ms)
+benchmarking Golf
+time                 994.5 ms   (978.1 ms .. 1.019 s)
+                     1.000 R²   (1.000 R² .. 1.000 R²)
+mean                 1.000 s    (994.2 ms .. 1.006 s)
+std dev              6.856 ms   (2.888 ms .. 8.913 ms)
 variance introduced by outliers: 19% (moderately inflated)
 
+benchmarking Reduced Convolution
+time                 31.66 ms   (30.41 ms .. 32.60 ms)
+                     0.997 R²   (0.995 R² .. 0.999 R²)
+mean                 34.40 ms   (33.52 ms .. 35.20 ms)
+std dev              1.924 ms   (1.439 ms .. 2.373 ms)
+variance introduced by outliers: 18% (moderately inflated)
+
+benchmarking Parallelized Convolution
+time                 11.33 ms   (11.14 ms .. 11.52 ms)
+                     0.999 R²   (0.997 R² .. 1.000 R²)
+mean                 11.31 ms   (11.24 ms .. 11.40 ms)
+std dev              246.6 μs   (173.4 μs .. 322.5 μs)
+
 benchmarking Vector Naive Convolution
-time                 235.8 ms   (126.4 ms .. 343.1 ms)
-                     0.934 R²   (0.607 R² .. 1.000 R²)
-mean                 243.7 ms   (222.7 ms .. 276.6 ms)
-std dev              34.00 ms   (13.24 ms .. 47.99 ms)
-variance introduced by outliers: 37% (moderately inflated)
+time                 157.1 ms   (155.9 ms .. 158.6 ms)
+                     1.000 R²   (1.000 R² .. 1.000 R²)
+mean                 157.3 ms   (156.4 ms .. 158.2 ms)
+std dev              1.400 ms   (1.005 ms .. 1.946 ms)
+variance introduced by outliers: 12% (moderately inflated)
+
+benchmarking Unboxed Vector Naive Convolution
+time                 50.64 ms   (48.03 ms .. 53.24 ms)
+                     0.991 R²   (0.975 R² .. 0.998 R²)
+mean                 50.95 ms   (49.74 ms .. 52.24 ms)
+std dev              2.365 ms   (1.889 ms .. 3.155 ms)
+variance introduced by outliers: 14% (moderately inflated)
 
 benchmarking Array Naive Convolution
-time                 34.25 ms   (25.28 ms .. 44.14 ms)
-                     0.824 R²   (0.718 R² .. 0.972 R²)
-mean                 45.50 ms   (38.80 ms .. 55.19 ms)
-std dev              16.10 ms   (11.34 ms .. 20.18 ms)
-variance introduced by outliers: 93% (severely inflated)
+time                 25.07 ms   (24.55 ms .. 26.00 ms)
+                     0.995 R²   (0.987 R² .. 1.000 R²)
+mean                 25.17 ms   (24.83 ms .. 25.94 ms)
+std dev              1.062 ms   (459.9 μs .. 1.759 ms)
+variance introduced by outliers: 15% (moderately inflated)
 
-  96,496,437,312 bytes allocated in the heap
-  90,963,744,376 bytes copied during GC
-   1,273,309,280 bytes maximum residency (303 sample(s))
-     135,738,328 bytes maximum slop
-            1214 MB total memory in use (0 MB lost due to fragmentation)
+benchmarking Unboxed Array Naive Convolution
+time                 16.30 ms   (16.12 ms .. 16.54 ms)
+                     1.000 R²   (0.999 R² .. 1.000 R²)
+mean                 16.27 ms   (16.21 ms .. 16.37 ms)
+std dev              207.1 μs   (126.5 μs .. 348.0 μs)
+
+benchmarking Stream Naive Convolution
+time                 6.614 s    (6.528 s .. 6.704 s)
+                     1.000 R²   (1.000 R² .. 1.000 R²)
+mean                 6.712 s    (6.652 s .. 6.743 s)
+std dev              49.39 ms   (20.77 ms .. 65.52 ms)
+variance introduced by outliers: 19% (moderately inflated)
+
+benchmarking Direct Convolution (foldr)
+time                 602.3 ms   (580.8 ms .. 625.6 ms)
+                     1.000 R²   (1.000 R² .. 1.000 R²)
+mean                 600.6 ms   (597.3 ms .. 604.5 ms)
+std dev              4.042 ms   (1.750 ms .. 5.611 ms)
+variance introduced by outliers: 19% (moderately inflated)
+
+benchmarking Direct Convolution (foldl')
+time                 4.002 s    (3.568 s .. 4.629 s)
+                     0.997 R²   (0.992 R² .. 1.000 R²)
+mean                 3.990 s    (3.823 s .. 4.057 s)
+std dev              124.3 ms   (7.903 ms .. 155.0 ms)
+variance introduced by outliers: 19% (moderately inflated)
+
+ 404,444,918,384 bytes allocated in the heap
+ 128,093,923,664 bytes copied during GC
+   1,058,096,256 bytes maximum residency (6645 sample(s))
+      16,285,560 bytes maximum slop
+            1009 MB total memory in use (0 MB lost due to fragmentation)
 
                                      Tot time (elapsed)  Avg pause  Max pause
-  Gen  0     77310 colls, 77310 par   193.783s  49.134s     0.0006s    0.0189s
-  Gen  1       303 colls,   302 par   58.310s  15.516s     0.0512s    0.6744s
+  Gen  0     264157 colls, 264157 par   779.245s  92.522s     0.0004s    0.0036s
+  Gen  1      6645 colls,  6644 par   180.998s  19.587s     0.0029s    0.3983s
 
-  Parallel GC work balance: 34.42% (serial 0%, perfect 100%)
+  Parallel GC work balance: 22.87% (serial 0%, perfect 100%)
 
-  TASKS: 13 (1 bound, 12 peak workers (12 total), using -N4)
+  TASKS: 32 (1 bound, 31 peak workers (31 total), using -N12)
 
-  SPARKS: 2551768(1929381 converted, 622364 overflowed, 0 dud, 0 GC'd, 23 fizzled)
+  SPARKS: 4883556(3872987 converted, 1010569 overflowed, 0 dud, 0 GC'd, 0 fizzled)
 
-  INIT    time    0.005s  (  0.004s elapsed)
-  MUT     time   67.497s  ( 54.423s elapsed)
-  GC      time  252.093s  ( 64.650s elapsed)
-  EXIT    time    0.003s  (  0.005s elapsed)
-  Total   time  319.598s  (119.082s elapsed)
+  INIT    time    0.001s  (  0.003s elapsed)
+  MUT     time  235.293s  (121.755s elapsed)
+  GC      time  960.243s  (112.109s elapsed)
+  EXIT    time    0.000s  (  0.005s elapsed)
+  Total   time  1195.537s  (233.871s elapsed)
 
-  Alloc rate    1,429,639,844 bytes per MUT second
+  Alloc rate    1,718,897,672 bytes per MUT second
 
-  Productivity  21.1% of total user, 45.7% of total elapsed
+  Productivity  19.7% of total user, 52.1% of total elapsed
 
 Benchmark bench-convolution: FINISH
 ```
