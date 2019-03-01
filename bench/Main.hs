@@ -13,6 +13,7 @@ import           Naive
 main :: IO ()
 main = defaultMain
   [ bench "Naive Convolution"                (runConv Naive)
+  , bench "Golf"                             (runConv Golf)
   , bench "Reduced Convolution"              (runConv Reduced)
   , bench "Parallelized Convolution"         (runConv Parallel)
   , bench "Vector Naive Convolution"         (runConvV VectorNaive)

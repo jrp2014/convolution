@@ -151,6 +151,11 @@ convolveS s t =
     convolveS' (hs:ts) t'@(ht:tt) =
       hs * ht : zipWith (+) (map (hs *) tt) (convolveS' ts t')
 
+
+(#) :: (Num a, NFData a) => [a] -> [a] -> [a]
+(a : b) # c = zipWith (+) (0 : b # c) $ map (a *) c ++ [] # b
+_       # c = 0 <$ c
+
 data ConvType
   = Naive
   | Reduced
@@ -162,6 +167,7 @@ data ConvType
   | ArrayNaive
   | UnboxedArrayNaive
   | StreamNaive
+  | Golf
   deriving (Eq, Ord)
 
 convTypes :: M.Map ConvType ([Int] -> [Int] -> [Int])
@@ -173,6 +179,7 @@ convTypes =
     , (DirectR, convolveR)
     , (DirectL, convolveL)
     , (StreamNaive, convolveS)
+    , (Golf, (#))
     ]
 
 convVTypes :: M.Map ConvType (V.Vector Int -> V.Vector Int -> V.Vector Int)

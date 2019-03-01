@@ -90,6 +90,8 @@ spec = do
     it ("convolves " ++ show hs ++ " with " ++ show xs ++ " using convolveS") $
       convolveS hs xs `shouldBe`
       hxs
+    it ("convolves " ++ show hs ++ " with " ++ show xs ++ " using (#)") $
+      hs # xs `shouldBe` hxs
   describe "Commutativity" $ do
     it "of convolve" $ property $ \pxs phs ->
       not (null pxs) && not (null phs) ==>
@@ -135,3 +137,8 @@ spec = do
       not (null pxs) && not (null phs) ==>
       convolveS (pxs :: [Int]) (phs :: [Int]) ==
       convolveS phs pxs
+    it "of (#)" $ property $ \pxs phs ->
+      not (null pxs) && not (null phs) ==>
+      (pxs :: [Int]) # (phs :: [Int]) ==
+      phs # pxs
+
