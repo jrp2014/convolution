@@ -117,11 +117,13 @@ convolveUA x1 x2 =
     m3 = m1 + m2
 
 convolveR :: (Num a) => [a] -> [a] -> [a]
-convolveR xs ys = map sum' $ foldr f [] xs
+convolveR xs ys = foldr f [] xs
   where
-    f x zs = foldr (g x) id ys ([] : zs)
-    g x y a (z:zs) = ((x * y) : z) : a zs
-    g x y a [] = [x * y] : a []
+    f x zs = foldr (g x) id ys (0 : zs)
+    --g x y a (z:zs) = ((x * y) : z) : a zs
+    --g x y a [] = [x * y] : a []
+    g x y a []     = x * y : a []
+    g x y a (z:zs) = x * y +  z : a zs
 
 -- TODO:: refactor
 convolveL :: (Num a) => [a] -> [a] -> [a]
