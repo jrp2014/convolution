@@ -38,11 +38,17 @@ common base
   if flag (LLVM)
     ghc-options: -Wall -Wextra -Wincomplete-record-updates
                  -Wincomplete-uni-patterns -Wredundant-constraints -Wcompat
-                 -O2 -fllvm -feager-blackholing
+                 -Wmissed-specialisations -Wmissing-export-lists -Widentities
+                 -Wredundant-constraints -Wmissing-home-modules
+                 -O2 -fllvm
+                 -feager-blackholing
   else
     ghc-options: -Wall -Wextra -Wincomplete-record-updates
                  -Wincomplete-uni-patterns -Wredundant-constraints -Wcompat
-                 -O2 -feager-blackholing
+                 -Wmissed-specialisations -Wmissing-export-lists -Widentities
+                 -Wredundant-constraints -Wmissing-home-modules
+                 -O2
+                 -feager-blackholing
 
   default-language:    Haskell2010
 

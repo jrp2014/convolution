@@ -49,13 +49,15 @@ convolve hs xs =
     roll hs ts =
       let sample = sum' $ zipWith (*) ts hs
     --let sample = dotp ts hs
-       in sample : roll hs (tail ts)
+     in sample : roll hs (tail ts)
+{-# INLINEABLE convolve #-}
 
 convolve' :: (Num a) => [a] -> [a] -> [a]
 convolve' hs xs =
   let pad = replicate (length hs - 1) 0
       ts = pad ++ xs
    in map (sum' . zipWith (*) (reverse hs)) (init $ tails ts)
+{-# INLINEABLE convolve' #-}
 
 convolveV :: (Num a) => V.Vector a -> V.Vector a -> V.Vector a
 convolveV hs xs =
@@ -71,6 +73,7 @@ convolveV hs xs =
        =
         let sample = V.sum $ V.zipWith (*) ts hs
          in V.cons sample (roll hs (V.tail ts))
+{-# INLINEABLE convolveV #-}
 
 convolveUV :: (Num a, UV.Unbox a) => UV.Vector a -> UV.Vector a -> UV.Vector a
 convolveUV hs xs =
@@ -86,6 +89,7 @@ convolveUV hs xs =
        =
         let sample = UV.sum $ UV.zipWith (*) ts hs
          in UV.cons sample (roll hs (UV.tail ts))
+{-# INLINEABLE convolveUV #-}
 
 convolveA ::
      (A.Ix a, Integral a, Num b) => A.Array a b -> A.Array a b -> A.Array a b
@@ -99,6 +103,7 @@ convolveA x1 x2 =
     m1 = snd $ A.bounds x1
     m2 = snd $ A.bounds x2
     m3 = m1 + m2
+{-# INLINEABLE convolveA #-}
 
 convolveUA ::
      (UA.Ix a, Integral a, Num b, UA.IArray UA.UArray b)
@@ -115,6 +120,7 @@ convolveUA x1 x2 =
     m1 = snd $ UA.bounds x1
     m2 = snd $ UA.bounds x2
     m3 = m1 + m2
+{-# INLINEABLE convolveUA #-}
 
 convolveR :: (Num a) => [a] -> [a] -> [a]
 convolveR xs ys = foldr f [] xs
@@ -124,14 +130,16 @@ convolveR xs ys = foldr f [] xs
     --g x y a [] = [x * y] : a []
     g x y a []     = x * y : a []
     g x y a (z:zs) = x * y +  z : a zs
+{-# INLINEABLE convolveR #-}
 
 -- TODO:: refactor
 convolveL :: (Num a) => [a] -> [a] -> [a]
-convolveL xs ys = map sum' $ foldl' (\h b x -> h (f b x)) id xs []
+convolveL xs ys = foldl' (\h b x -> h (f b x)) id xs []
   where
-    f x zs = foldl' (\h b y -> h (g x b y)) id ys id ([] : zs)
-    g x y a (z:zs) = ((x * y) : z) : a zs
-    g x y a [] = [x * y] : a []
+    f x zs = foldl' (\h b y -> h (g x b y)) id ys id (0 : zs)
+    g x y a (z:zs) = (x * y + z) : a zs
+    g x y a [] = x * y : a []
+{-# INLINEABLE convolveL #-}
 
 parConvolve :: (NFData a, Num a) => [a] -> [a] -> [a]
 parConvolve [] _ = []
@@ -139,6 +147,7 @@ parConvolve hs xs =
   let pad = replicate (length hs - 1) 0
       ts = pad ++ xs
    in parMap rdeepseq (sum' . zipWith (*) (reverse hs)) (init $ tails ts)
+{-# INLINEABLE parConvolve #-}
 
 -- s and t must be of the same length
 -- convolve' [1,2,3,4,0,0,0,0] [1,2,3,4,5,0,0,0] == [1,4,10,20,30,34,31,20]
@@ -152,11 +161,13 @@ convolveS s t =
     ll = ls + lt - 1
     convolveS' (hs:ts) t'@(ht:tt) =
       hs * ht : zipWith (+) (map (hs *) tt) (convolveS' ts t')
+{-# INLINEABLE convolveS #-}
 
 
 (#) :: (Num a, NFData a) => [a] -> [a] -> [a]
 (a : b) # c = zipWith (+) (0 : b # c) $ map (a *) c ++ [] # b
 _       # c = 0 <$ c
+{-# INLINEABLE (#) #-}
 
 data ConvType
   = Naive
