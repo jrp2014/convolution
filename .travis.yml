@@ -41,6 +41,6 @@ install:
 # any command which exits with a non-zero exit code causes the build to fail.
 script:
   - travis_retry cabal v2-update -v
-  - cabal v2-build
-  - cabal v2-test --enable-tests
-  - cabal v2-bench --enable-benchmarks
+  - cabal v2-build -v
+  - cabal v2-test --enable-tests -v
+  - cabal v2-bench --enable-benchmarks --enable-optimization=2 -v
