@@ -24,7 +24,7 @@ source-repository      head
   location:            https://github.com/jrp2014/convolution
 
 flag LLVM
-  default:             False
+  default:             True
   description: Use LLVM build for better performance
 
 common base
@@ -40,7 +40,7 @@ common base
                  -Wincomplete-uni-patterns -Wredundant-constraints -Wcompat
                  -Wmissed-specialisations -Wmissing-export-lists -Widentities
                  -Wredundant-constraints -Wmissing-home-modules
-                 -O2 -fllvm
+                 -O2 -fllvm -optlo-O3
                  -feager-blackholing
   else
     ghc-options: -Wall -Wextra -Wincomplete-record-updates
