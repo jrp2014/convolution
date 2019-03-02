@@ -40,7 +40,7 @@ install:
 # Here starts the actual work to be performed for the package under test;
 # any command which exits with a non-zero exit code causes the build to fail.
 script:
-  - travis_retry caval v2-update -v
+  - travis_retry cabal v2-update -v
   - cabal v2-build
   - cabal v2-test --enable-tests
   - cabal v2-bench --enable-benchmarks
