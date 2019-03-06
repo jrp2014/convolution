@@ -2,7 +2,6 @@
 module RepaConv where
 
 import qualified Data.Array.Repa as R
-import Control.Monad.Identity
 
 type Complex = (Float, Float)
 type Data = R.Array R.U R.DIM1 Complex
@@ -56,18 +55,18 @@ convolve !size stencil input = R.computeUnboxedS $ R.fromFunction shape genOne
       in final
     shape =  R.Z  R.:. size :: R.DIM1
 
-run :: Int -> Stencil -> Int -> Data -> Identity Data
-run size stencil n input | n == 0    = return input
-                         | otherwise = convolve size stencil input >>= run size stencil (n-1)
+run :: Int -> Stencil -> Int -> Data -> Data
+run size stencil n input | n == 0    = input
+                         | otherwise = run size stencil (n-1) $ convolve size stencil input
 
-buildIt :: [String] -> Identity (Identity Data)
-buildIt args = do
+buildIt :: [String] -> (Stencil, Data)
+buildIt args = 
   let input   = genInput size
-  let stencil = R.fromFunction stencilShape $ const 2
-  let runIt  = run size stencil iterations input
+      stencil = R.fromFunction stencilShape $ const 2
+      runIt   = run size stencil iterations input
       --showIt = fmap (show . checkSum) runIt
   --return (runIt, showIt)
-  return runIt
+   in (stencil, runIt)
   where
     (size, iterations) = case args of
              []     -> (1000000::Int, 1::Int)
