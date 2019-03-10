@@ -58,6 +58,9 @@ dotp' u v = loop 0 0 0
   loop z i j | i < n && j < m = loop (z + u V.! i * v V.! j) (i + 1) (j + 1)
              | otherwise      = z
 
+dotProduct :: Num a => [a] -> [a] -> a
+dotProduct = (sum' .) . zipWith (*)
+
 convolve :: (Num a) => [a] -> [a] -> [a]
 convolve hs xs =
   let pad = replicate (length hs - 1) 0
