@@ -74,3 +74,6 @@ test2 =
         , 0 :+ 0
         ]
    in zipWith (-) ((fst . fft) [0, 1, 2, 3, 0, 1, 2, 3]) mathematica2
+
+
+test3 = fft [1,1,1,1,0,0,0,0]

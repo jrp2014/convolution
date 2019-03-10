@@ -13,16 +13,16 @@ import Control.Parallel.Strategies
 
 
 -- generating input for FFT or DFT. Borrowed from Simon Marlow I believe.
-mX, mY, sdX, sdY :: Float
+mX, mY, sdX, sdY :: Double
 mX = 0
 mY = 0
 sdX = 0.5
 sdY = 1.5    
 
 generate2DSamplesList :: Int           -- number of samples to generate
-                  -> Float -> Float    -- X and Y mean
-                  -> Float -> Float    -- X and Y standard deviations
-                  -> IO [Complex Float]
+                  -> Double -> Double    -- X and Y mean
+                  -> Double -> Double    -- X and Y standard deviations
+                  -> IO [Complex Double]
 generate2DSamplesList n mx my sdx sdy = do
   gen <- getStdGen
   let (genx, geny) = split gen
@@ -48,10 +48,10 @@ divConq indiv split join f prob = undefined
 
 
 -- twiddle factors
-tw :: Int -> Int -> Complex Float
+tw :: Int -> Int -> Complex Double
 tw n k = cis (-2 * pi * fromIntegral k / fromIntegral n)
 
-dft :: [Complex Float] -> [Complex Float]
+dft :: [Complex Double] -> [Complex Double]
 dft xs = [ sum [ xs!!j * tw n (j*k) | j <- [0..n']] | k <- [0..n']]
   where
     n = length xs
@@ -62,7 +62,7 @@ dft xs = [ sum [ xs!!j * tw n (j*k) | j <- [0..n']] | k <- [0..n']]
 -- In case you are wondering, this is the Decimation in Frequency (DIF) 
 -- radix 2 Cooley-Tukey FFT
 
-fft :: [Complex Float] -> [Complex Float]
+fft :: [Complex Double] -> [Complex Double]
 fft [a] = [a]
 fft as = interleave ls rs
   where
@@ -74,13 +74,13 @@ interleave :: [a] -> [a] -> [a]
 interleave [] bs = bs
 interleave (a:as) bs = a : interleave bs as
 
-bflyS :: [Complex Float] -> ([Complex Float], [Complex Float])
+bflyS :: [Complex Double] -> ([Complex Double], [Complex Double])
 bflyS as = (los,rts)
   where
     (ls,rs) = halve as
     los = zipWith (+) ls rs
     ros = zipWith (-) ls rs
-    rts = zipWith (*) ros [tw (length as) i | i <- [0..(length ros) - 1]]
+    rts = zipWith (*) ros [tw (length as) i | i <- [0..length ros - 1]]
 
 
 -- missing from original file
