@@ -32,10 +32,13 @@ conv xs ys =
 
 main :: IO ()
 main =
+  print test6
+    {-
   print
     (if test1 && test2 && test3
        then "ok"
        else "nok")
+ -}
 
 -- 7-point DFT (prime number) compared to Mathematica's evaluation
 test1 :: Bool
@@ -93,6 +96,9 @@ test5 = all (== True) t5
       n <- [0 .. 1023]
       let x = impulse n 1024 :: [Complex Float]
       return $ map (roundComplex 3 0.001) (ifft (fft x)) == x
+
+test6 :: [Complex Float]
+test6 =conv (map fromInteger [1..2^10] :: [Complex Float]) (map fromInteger [1..2^13] :: [Complex Float])
 
 -- Discrete Dirac delta generator
 impulse :: Num a => Int -> Int -> [a]
