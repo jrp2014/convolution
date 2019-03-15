@@ -26,9 +26,9 @@ conv xs ys =
     ly = length ys
     ll = lx + ly - 1
     l = 2 * max lx ly - 1
-    padx = replicate (l - lx) 0
-    pady = replicate (l - ly) 0
-    scale = sqrt . fromIntegral $ l
+    padx = replicate (ll - lx) 0
+    pady = replicate (ll - ly) 0
+    scale = sqrt . fromIntegral $ ll
 
 main :: IO ()
 main =
