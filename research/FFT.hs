@@ -43,3 +43,16 @@ convolve a b = map realPart c
 
 round2 :: (RealFrac a1, Fractional a2) => a1 -> a2
 round2 f = fromInteger (round $ f * 100) / 100
+
+-- http://www.robinscheibler.org/2013/02/13/real-fft.html
+--convolve' :: (RealFloat a) => [a] -> [a] -> [a]
+convolve' xs ys = fft zs''' (1 / w)
+  where
+    n = length xs -- == length ys, even
+    zs = zipWith (:+) xs ys
+    w = exp (pi * (0 :+ 1) / fromIntegral (n `div` 2))
+    zs' = fft zs w  -- Z [n]
+    zs'' = reverse zs'  -- Z [N - k]
+    zx = zipWith (\x y -> (realPart (x + y) :+ imagPart (x - y)) / 2.0) zs' zs''
+    zy = zipWith (\x y -> (imagPart (x + y) :+ realPart (y - x)) / 2.0) zs' zs''
+    zs''' = zipWith (\x y -> x * y / fromIntegral ( 2 * n)) zx zy
