@@ -1,4 +1,5 @@
 {-# LANGUAGE FlexibleContexts #-}
+
 module NaiveSpec
   ( spec
   ) where
@@ -15,7 +16,7 @@ import qualified Data.Vector as V
 import qualified Data.Vector.Unboxed as UV
 
 -- Don't use the quickcheck-instances version, as it picks arbitrary bounds
---  rather than indexing from zero
+-- rather than indexing from zero
 instance (A.Ix a, Integral a, Arbitrary b) => Arbitrary (A.Array a b) where
   arbitrary =
     (\x -> A.listArray (0, fromIntegral (length x - 1)) x) <$> arbitrary
@@ -23,12 +24,14 @@ instance (A.Ix a, Integral a, Arbitrary b) => Arbitrary (A.Array a b) where
 instance (CoArbitrary b) => CoArbitrary (A.Array a b) where
   coarbitrary = coarbitrary . A.elems
 
-instance (UA.Ix i, Integral i, UA.IArray UA.UArray a, Arbitrary a) => Arbitrary (UA.UArray i a) where
-    arbitrary =
-     (\x -> UA.listArray (0, fromIntegral (length x - 1)) x) <$> arbitrary
+instance (UA.Ix i, Integral i, UA.IArray UA.UArray a, Arbitrary a) =>
+         Arbitrary (UA.UArray i a) where
+  arbitrary =
+    (\x -> UA.listArray (0, fromIntegral (length x - 1)) x) <$> arbitrary
 
-instance (UA.Ix i, UA.IArray UA.UArray a, CoArbitrary a) => CoArbitrary (UA.UArray i a) where
-    coarbitrary = coarbitrary . UA.elems
+instance (UA.Ix i, UA.IArray UA.UArray a, CoArbitrary a) =>
+         CoArbitrary (UA.UArray i a) where
+  coarbitrary = coarbitrary . UA.elems
 
 hs :: [Int]
 hs = [1, 2, 3, 4, 5]
@@ -90,13 +93,12 @@ spec = do
     it ("convolves " ++ show hs ++ " with " ++ show xs ++ " using convolveS") $
       convolveS hs xs `shouldBe`
       hxs
-    it ("convolves " ++ show hs ++ " with " ++ show xs ++ " using (#)") $
-      hs # xs `shouldBe` hxs
+    it ("convolves " ++ show hs ++ " with " ++ show xs ++ " using (#)") $ hs #
+      xs `shouldBe`
+      hxs
   describe "Commutativity" $ do
-    it "of convolve" $ property $ \pxs phs ->
-      not (null pxs) && not (null phs) ==>
-      convolve (pxs :: [Int]) (phs :: [Int]) ==
-      convolve phs pxs
+    it "of convolve" $ property $ \(NonEmpty pxs) (NonEmpty phs) ->
+      convolve (pxs :: [Int]) (phs :: [Int]) == convolve phs pxs
     it "of convolveV" $ property $ \pxs phs ->
       not (V.null pxs) && not (V.null phs) ==>
       convolveV (pxs :: V.Vector Int) (phs :: V.Vector Int) ==
@@ -117,28 +119,17 @@ spec = do
        in 0 < u && 0 < u' ==>
           convolveUA (pxs :: UA.UArray Int Int) (phs :: UA.UArray Int Int) ==
           convolveUA phs pxs
-    it "of convolveR" $ property $ \pxs phs ->
+    it "of convolveR" $ property $ \(NonEmpty pxs) (NonEmpty phs) ->
       not (null pxs) && not (null phs) ==>
       convolveR (pxs :: [Int]) (phs :: [Int]) ==
       convolveR phs pxs
-    it "of convolveL" $ property $ \pxs phs ->
-      not (null pxs) && not (null phs) ==>
-      convolveL (pxs :: [Int]) (phs :: [Int]) ==
-      convolveL phs pxs
-    it "of convolve'" $ property $ \pxs phs ->
-      not (null pxs) && not (null phs) ==>
-      convolve' (pxs :: [Int]) (phs :: [Int]) ==
-      convolve' phs pxs
-    it "of parConvolve" $ property $ \pxs phs ->
-      not (null pxs) && not (null phs) ==>
-      parConvolve (pxs :: [Int]) (phs :: [Int]) ==
-      parConvolve phs pxs
-    it "of convolveS" $ property $ \pxs phs ->
-      not (null pxs) && not (null phs) ==>
-      convolveS (pxs :: [Int]) (phs :: [Int]) ==
-      convolveS phs pxs
-    it "of (#)" $ property $ \pxs phs ->
-      not (null pxs) && not (null phs) ==>
-      (pxs :: [Int]) # (phs :: [Int]) ==
-      phs # pxs
-
+    it "of convolveL" $ property $ \(NonEmpty pxs) (NonEmpty phs) ->
+      convolveL (pxs :: [Int]) (phs :: [Int]) == convolveL phs pxs
+    it "of convolve'" $ property $ \(NonEmpty pxs) (NonEmpty phs) ->
+      convolve' (pxs :: [Int]) (phs :: [Int]) == convolve' phs pxs
+    it "of parConvolve" $ property $ \(NonEmpty pxs) (NonEmpty phs) ->
+      parConvolve (pxs :: [Int]) (phs :: [Int]) == parConvolve phs pxs
+    it "of convolveS" $ property $ \(NonEmpty pxs) (NonEmpty phs) ->
+      convolveS (pxs :: [Int]) (phs :: [Int]) == convolveS phs pxs
+    it "of (#)" $ property $ \(NonEmpty pxs) (NonEmpty phs) ->
+      (pxs :: [Int]) # (phs :: [Int]) == phs # pxs
