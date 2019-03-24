@@ -1,4 +1,7 @@
-module FFT (convolve, convolve') where
+module FFT
+  ( convolve
+  , convolve'
+  ) where
 
 import Data.Complex
 
@@ -56,23 +59,21 @@ convolve' xs ys = map realPart c
     zs' = fft zs w -- Z [n]
     zs'' = zs' ++ [head zs']
     zs''' = reverse zs'' -- Z* [N - k]
-    normalize = 1.0 / (4.0 * fromIntegral n)
+    normalize = 1.0 / (8.0 * fromIntegral n)
   -- g and h have complex conjugate (Hermitian) symmetry, so really only need
   -- 0..n/2 of these
     -- TODO:: turn the following into a single traversal
     g =
       init $
       zipWith
-        (\x y ->
-           normalize * ((realPart x + realPart y) :+ (imagPart x - imagPart y)))
+        (\x y -> (realPart x + realPart y) :+ (imagPart x - imagPart y))
         zs''
         zs'''
     h =
       init $
       zipWith
-        (\x y ->
-           normalize * ((imagPart x + imagPart y) :+ (realPart y - realPart x)))
+        (\x y -> (imagPart x + imagPart y) :+ (realPart y - realPart x))
         zs''
         zs'''
-    f_c = zipWith (*) g h
+    f_c = zipWith (\l r -> normalize * l * r) g h
     c = init $ fft f_c (1 / w) -- drop the last 0
