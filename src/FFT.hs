@@ -41,8 +41,9 @@ convolve a b = map realPart c
     w = exp (pi * (0 :+ 1) / fromIntegral n)
     f_a = fft (map (:+ 0) $ a ++ padding) w
     f_b = fft (map (:+ 0) $ b ++ padding) w
-    f_c = zipWith (*) f_a f_b
-    c = init $ map (/ (fromIntegral $ 2 * n)) $ fft f_c (1 / w)
+    normalize = 1.0 / (8.0 * fromIntegral n)
+    f_c = zipWith (\x y -> normalize * x * y) f_a f_b
+    c = init $ fft f_c (1 / w)
 
 round2 :: (RealFrac a1, Fractional a2) => a1 -> a2
 round2 f = fromInteger (round $ f * 100) / 100

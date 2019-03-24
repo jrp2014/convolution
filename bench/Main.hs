@@ -94,31 +94,31 @@ main = defaultMain
   ]
  where
   runConv ctype =
-    let hs     = [1 .. 1000]
-        ts     = [1 .. 10000]
+    let hs     = [1 .. 1024]
+        ts     = [1 .. 8192]
         convfn = fromJust $ M.lookup ctype convTypes
     in  nf (convfn hs) ts
 
   runConvV ctype =
-    let hs     = V.enumFromN 1 1000
-        ts     = V.enumFromN 1 10000
+    let hs     = V.enumFromN 1 1024
+        ts     = V.enumFromN 1 8192
         convfn = fromJust $ M.lookup ctype convVTypes
     in  nf (convfn hs) ts
 
   runConvUV ctype =
-    let hs     = UV.enumFromN 1 1000
-        ts     = UV.enumFromN 1 10000
+    let hs     = UV.enumFromN 1 1024
+        ts     = UV.enumFromN 1 8192
         convfn = fromJust $ M.lookup ctype convUTypes
     in  nf (convfn hs) ts
 
   runConvA ctype =
-    let hs     = A.listArray (0, 999) [1 .. 1000]
-        ts     = A.listArray (0, 9999) [1 .. 10000]
+    let hs     = A.listArray (0, 1023) [1 .. 1024]
+        ts     = A.listArray (0, 8191) [1 .. 8192]
         convfn = fromJust $ M.lookup ctype convATypes
     in  nf (convfn hs) ts
 
   runConvUA ctype =
-    let hs     = UA.listArray (0, 999) [1 .. 1000]
-        ts     = UA.listArray (0, 9999) [1 .. 10000]
+    let hs     = UA.listArray (0, 1023) [1 .. 1024]
+        ts     = UA.listArray (0, 8191) [1 .. 8192]
         convfn = fromJust $ M.lookup ctype convUATypes
     in  whnf (convfn hs) ts
