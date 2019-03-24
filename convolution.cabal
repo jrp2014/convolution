@@ -65,7 +65,7 @@ common profiled-main
 
 library
   import:              base
-  exposed-modules:     Naive
+  exposed-modules:     Naive, FFT
   hs-source-dirs:      src
   -- other-modules:
   -- other-extensions:
@@ -74,14 +74,14 @@ benchmark              bench-convolution
   import:              main
   type:                exitcode-stdio-1.0
   main-is:             Main.hs
-  other-modules:       Naive
+  other-modules:       Naive, FFT
   hs-source-dirs:      bench, src
   -- other-extensions:
 
 executable             profiled-convolution
   import:              profiled-main
   main-is:             Main.hs
-  other-modules:       Naive
+  other-modules:       Naive, FFT
   hs-source-dirs:      bench, src
   -- other-extensions:
 

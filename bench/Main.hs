@@ -9,20 +9,88 @@ import           Data.Maybe                     ( fromJust )
 import qualified Data.Vector                   as V
 import qualified Data.Vector.Unboxed           as UV
 import           Naive
+import qualified FFT
+
+data ConvType
+  = Naive
+  | Reduced
+  | Parallel
+  | DirectR
+  | DirectL
+  | VectorNaive
+  | UnboxedVectorNaive
+  | ArrayNaive
+  | UnboxedArrayNaive
+  | StreamNaive
+  | Golf
+  | FFT1
+  | FFT2
+  deriving (Eq, Ord)
+
+type BaseReal = Double
+
+convTypes :: M.Map ConvType ([BaseReal] -> [BaseReal] -> [BaseReal])
+convTypes = M.fromList
+  [ (Naive      , convolve)
+  , (Reduced    , convolve')
+  , (Parallel   , parConvolve)
+  , (DirectR    , convolveR)
+  , (DirectL    , convolveL)
+  , (StreamNaive, convolveS)
+  , (Golf       , (#))
+  , (FFT1       , FFT.convolve)
+  , (FFT2       , FFT.convolve')
+  ]
+
+convVTypes
+  :: M.Map
+       ConvType
+       (V.Vector BaseReal -> V.Vector BaseReal -> V.Vector BaseReal)
+convVTypes = M.fromList [(VectorNaive, convolveV)]
+
+convUTypes
+  :: M.Map
+       ConvType
+       (UV.Vector BaseReal -> UV.Vector BaseReal -> UV.Vector BaseReal)
+convUTypes = M.fromList [(UnboxedVectorNaive, convolveUV)]
+
+convATypes
+  :: M.Map
+       ConvType
+       (A.Array Int BaseReal -> A.Array Int BaseReal -> A.Array Int BaseReal)
+convATypes = M.fromList [(ArrayNaive, convolveA)]
+
+convUATypes
+  :: M.Map
+       ConvType
+       (  UA.UArray Int BaseReal
+       -> UA.UArray Int BaseReal
+       -> UA.UArray Int BaseReal
+       )
+convUATypes = M.fromList [(UnboxedArrayNaive, convolveUA)]
+
 
 main :: IO ()
 main = defaultMain
-  [ bench "Naive Convolution"                (runConv Naive)
-  , bench "Golf"                             (runConv Golf)
-  , bench "Reduced Convolution"              (runConv Reduced)
-  , bench "Parallelized Convolution"         (runConv Parallel)
-  , bench "Vector Naive Convolution"         (runConvV VectorNaive)
-  , bench "Unboxed Vector Naive Convolution" (runConvUV UnboxedVectorNaive)
-  , bench "Array Naive Convolution"          (runConvA ArrayNaive)
-  , bench "Unboxed Array Naive Convolution"  (runConvUA UnboxedArrayNaive)
-  , bench "Stream Naive Convolution"         (runConv StreamNaive)
-  , bench "Direct Convolution (foldr)"       (runConv DirectR)
-  , bench "Direct Convolution (foldl')"      (runConv DirectL)
+  [ bgroup
+    "FFT"
+    [ bench "Full complex"      (runConv FFT1)
+    , bench "Simultaneous real" (runConv FFT2)
+    ]
+  , bgroup
+    "Naive"
+    [ bench "Naive Convolution"                (runConv Naive)
+    , bench "Golf"                             (runConv Golf)
+    , bench "Reduced Convolution"              (runConv Reduced)
+    , bench "Parallelized Convolution"         (runConv Parallel)
+    , bench "Vector Naive Convolution"         (runConvV VectorNaive)
+    , bench "Unboxed Vector Naive Convolution" (runConvUV UnboxedVectorNaive)
+    , bench "Array Naive Convolution"          (runConvA ArrayNaive)
+    , bench "Unboxed Array Naive Convolution"  (runConvUA UnboxedArrayNaive)
+    , bench "Stream Naive Convolution"         (runConv StreamNaive)
+    , bench "Direct Convolution (foldr)"       (runConv DirectR)
+    , bench "Direct Convolution (foldl')"      (runConv DirectL)
+    ]
   ]
  where
   runConv ctype =

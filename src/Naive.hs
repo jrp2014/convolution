@@ -13,12 +13,6 @@ module Naive
   , parConvolve
   , convolveS
   , (#)
-  , ConvType (..)
-  , convTypes
-  , convVTypes
-  , convUTypes
-  , convATypes
-  , convUATypes
   )
 where
 
@@ -189,44 +183,3 @@ convolveS s t = convolveS' (s ++ replicate (ll - ls) 0)
 (a : b) # c = zipWith (+) (0 : b # c) $ map (a *) c ++ [] # b
 _       # c = 0 <$ c
 {-# INLINABLE (#) #-}
-
-data ConvType
-  = Naive
-  | Reduced
-  | Parallel
-  | DirectR
-  | DirectL
-  | VectorNaive
-  | UnboxedVectorNaive
-  | ArrayNaive
-  | UnboxedArrayNaive
-  | StreamNaive
-  | Golf
-  deriving (Eq, Ord)
-
-convTypes :: M.Map ConvType ([Int] -> [Int] -> [Int])
-convTypes = M.fromList
-  [ (Naive      , convolve)
-  , (Reduced    , convolve')
-  , (Parallel   , parConvolve)
-  , (DirectR    , convolveR)
-  , (DirectL    , convolveL)
-  , (StreamNaive, convolveS)
-  , (Golf       , (#))
-  ]
-
-convVTypes :: M.Map ConvType (V.Vector Int -> V.Vector Int -> V.Vector Int)
-convVTypes = M.fromList [(VectorNaive, convolveV)]
-
-convUTypes :: M.Map ConvType (UV.Vector Int -> UV.Vector Int -> UV.Vector Int)
-convUTypes = M.fromList [(UnboxedVectorNaive, convolveUV)]
-
-convATypes
-  :: M.Map ConvType (A.Array Int Int -> A.Array Int Int -> A.Array Int Int)
-convATypes = M.fromList [(ArrayNaive, convolveA)]
-
-convUATypes
-  :: M.Map
-       ConvType
-       (UA.UArray Int Int -> UA.UArray Int Int -> UA.UArray Int Int)
-convUATypes = M.fromList [(UnboxedArrayNaive, convolveUA)]
