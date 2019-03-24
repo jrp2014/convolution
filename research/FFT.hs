@@ -29,7 +29,7 @@ split = foldr f ([], [])
 --     1. Compute f_a = fft(a), f_b = fft(b)  .. O(n·logn)
 --     2. Compute product: f_c = f_a · f_c    .. O(n)
 --     3. Interpolate c: c = fft^{-1}(f_c)    .. O(n·logn)
---convolve :: (RealFloat a) => [a] -> [a] -> [a]
+convolve :: (RealFloat a) => [a] -> [a] -> [a]
 convolve [] _ = []
 convolve a b = map realPart c
   where
@@ -48,6 +48,7 @@ round2 f = fromInteger (round $ f * 100) / 100
 --convolve' :: (RealFloat a) => [a] -> [a] -> [a]
 -- http://sar.kangwon.ac.kr/gisg/FFT_book.pdf (p189ff)
 -- Uses 2, instead of 3 ffts
+convolve' :: (RealFloat a) => [a] -> [a] -> [a]
 convolve' xs ys = map realPart c
   where
     n = length xs -- == length ys, even
