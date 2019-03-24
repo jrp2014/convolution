@@ -41,7 +41,7 @@ convolve a b = map realPart c
     w = exp (pi * (0 :+ 1) / fromIntegral n)
     f_a = fft (map (:+ 0) $ a ++ padding) w
     f_b = fft (map (:+ 0) $ b ++ padding) w
-    normalize = 1.0 / (8.0 * fromIntegral n)
+    normalize = 1.0 / (2.0 * fromIntegral n)
     f_c = zipWith (\x y -> normalize * x * y) f_a f_b
     c = init $ fft f_c (1 / w)
 
@@ -64,17 +64,15 @@ convolve' xs ys = map realPart c
   -- g and h have complex conjugate (Hermitian) symmetry, so really only need
   -- 0..n/2 of these
     -- TODO:: turn the following into a single traversal
-    g =
+    f_c =
       init $
       zipWith
-        (\x y -> (realPart x + realPart y) :+ (imagPart x - imagPart y))
+        (\x y ->
+           let rx = realPart x
+               ry = realPart y
+               ix = imagPart x
+               iy = imagPart y
+            in ((rx + ry) :+ (ix - iy)) * ((ix + iy) :+ (ry - rx)) * normalize)
         zs''
         zs'''
-    h =
-      init $
-      zipWith
-        (\x y -> (imagPart x + imagPart y) :+ (realPart y - realPart x))
-        zs''
-        zs'''
-    f_c = zipWith (\l r -> normalize * l * r) g h
     c = init $ fft f_c (1 / w) -- drop the last 0
