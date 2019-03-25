@@ -60,22 +60,17 @@ convolve' xs ys = map realPart c
     zs' = fft zs w -- Z [n]
     zs'' = zs' ++ [head zs']
     zs''' = reverse zs'' -- Z* [N - k]
-    normalize = 1.0 / (8.0 * fromIntegral n * (0:+1))
+    normalize = (0 :+ 1.0) / (8.0 * fromIntegral n)
   -- g and h have complex conjugate (Hermitian) symmetry, so really only need
   -- 0..n/2 of these
     -- TODO:: turn the following into a single traversal
     f_c =
-      init $
+      take (n + 1) . init $
       zipWith
         (\x y ->
-           let rx = realPart x
-               ry = realPart y
-               ix = imagPart x
-               iy = imagPart y
-            --in ((rx + ry) :+ (ix - iy)) * ((ix + iy) :+ (ry - rx)) * normalize)
-               ystar = conjugate y
-               xstar = conjugate x
-            in (x + ystar) * (x - ystar) * normalize)
+           let ystar = conjugate y
+            in (x + ystar) * (ystar - x) * normalize)
         zs''
         zs'''
-    c = init $ fft f_c (1 / w) -- drop the last 0
+    f_c' = f_c ++ (map conjugate . reverse . tail $ init f_c)
+    c = init $ fft f_c' (1 / w) -- drop the last 0
