@@ -65,7 +65,7 @@ convolve' xs ys = map realPart c
   -- 0..n/2 of these
     -- TODO:: turn the following into a single traversal
     f_c =
-      take (n + 1) . init $
+      take (n + 1) $
       zipWith
         (\x y ->
            let ystar = conjugate y
