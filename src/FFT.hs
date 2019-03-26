@@ -7,17 +7,26 @@ where
 import           Data.Complex
 
 -- https://www.lopezferrando.com/learning-haskell/
+-- length fft is a power of 2
 fft :: (RealFloat a) => [Complex a] -> Complex a -> [Complex a]
-fft [a] _ = [a]
-fft a   w = zipWith (+) f_even (zipWith (*) ws1 f_odd)
-  ++ zipWith (+) f_even (zipWith (*) ws2 f_odd)
-  -- Take even and odd coefficients of a(x)
-
+fft a w | pow2 (length a) = fft' a w
+        | otherwise       = error "fft only defined for powers of 2"
  where
+  pow2 :: Int -> Bool
+  pow2 n | n == 1 || n == 2 = True
+         | otherwise        = n `mod` 2 == 0 && pow2 (n `div` 2)
+
+fft' :: (RealFloat a) => [Complex a] -> Complex a -> [Complex a]
+fft' [a] _ = [a]
+fft' a   w = zipWith (+) f_even (zipWith (*) ws1 f_odd)
+  ++ zipWith (+) f_even (zipWith (*) ws2 f_odd)
+ where
+  -- Take even and odd coefficients of a(x)
+  n               = length a
   (a_even, a_odd) = split a
-  f_even          = fft a_even (w * w)
-  f_odd           = fft a_odd (w * w)
-  ws1             = take (length a `div` 2) (iterate (* w) 1)
+  f_even          = fft' a_even (w * w)
+  f_odd           = fft' a_odd (w * w)
+  ws1             = take (n `div` 2) (iterate (* w) 1)
   ws2             = map negate ws1
 
 -- Compute FFT of a_even(x) and a_odd(x) recursively
@@ -35,11 +44,13 @@ convolve :: (RealFloat a) => [a] -> [a] -> [a]
 convolve [] _ = []
 convolve a  b = map realPart c
  where
-  n         = length a
-  padding   = replicate n 0
+  la        = length a
+  lb        = length b
+  n         = max la lb
+  lab       = 2 * n
   w         = exp (pi * (0 :+ 1) / fromIntegral n)
-  f_a       = fft (map (:+ 0) $ a ++ padding) w
-  f_b       = fft (map (:+ 0) $ b ++ padding) w
+  f_a       = fft (map (:+ 0) $ a ++ replicate (lab - la) 0) w
+  f_b       = fft (map (:+ 0) $ b ++ replicate (lab - lb) 0) w
   normalize = 1.0 / (2.0 * fromIntegral n)
   f_c       = zipWith (\x y -> normalize * x * y) f_a f_b
   c         = init $ fft f_c (1 / w)
@@ -53,8 +64,12 @@ round2 f = fromInteger (round $ f * 100) / 100
 convolve' :: (RealFloat a) => [a] -> [a] -> [a]
 convolve' xs ys = map realPart c
  where
-  n         = length xs -- == length ys, even
-  zs        = zipWith (:+) xs ys ++ replicate n 0
+  lxs       = length xs
+  lys       = length ys
+  n         = max lxs lys
+  xs'       = xs ++ replicate (n - lxs) 0
+  ys'       = ys ++ replicate (n - lys) 0
+  zs        = zipWith (:+) xs' ys ++ replicate n 0
   w         = exp (pi * (0 :+ 1) / fromIntegral n)
   zs'       = fft zs w -- Z [n]
   zs''      = zs' ++ [head zs']
@@ -62,10 +77,13 @@ convolve' xs ys = map realPart c
   normalize = (0 :+ 1.0) / (8.0 * fromIntegral n)
 -- g and h have complex conjugate (Hermitian) symmetry, so really only need
 -- 0..n/2 of these
-  -- TODO:: turn the following into a single traversal
   f_c       = take (n + 1) $ zipWith
     (\x y -> let ystar = conjugate y in (x + ystar) * (ystar - x) * normalize)
     zs''
     zs'''
   f_c' = f_c ++ (map conjugate . tail . reverse $ tail f_c)
   c    = init $ fft f_c' (1 / w) -- drop the last 0
+
+pow2 :: Int -> Bool
+pow2 n | n == 1 || n == 2 = True
+       | otherwise        = n `mod` 2 == 0 && pow2 (n `div` 2)
