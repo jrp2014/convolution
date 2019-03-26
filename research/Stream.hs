@@ -46,7 +46,6 @@ conv s t = conv' (s ++ replicate (ll - ls) 0) (t ++ replicate (ll - lt) 0)
   ll = ls + lt - 1
 
 conv' :: Num a => [a] -> [a] -> [a]
-<<<<<<< HEAD
 conv' (hs : ts) t'@(ht : tt) =
   hs * ht : zipWith (+) (map (hs *) tt) (conv' ts t')
 
