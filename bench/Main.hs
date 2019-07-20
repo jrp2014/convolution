@@ -10,6 +10,7 @@ import qualified Data.Vector                   as V
 import qualified Data.Vector.Unboxed           as UV
 import           Naive
 import qualified FFT
+import           Semi
 
 data ConvType
   = Naive
@@ -23,6 +24,7 @@ data ConvType
   | UnboxedArrayNaive
   | StreamNaive
   | Golf
+  | Conal
   | FFT1
   | FFT2
   deriving (Eq, Ord)
@@ -38,6 +40,7 @@ convTypes = M.fromList
   , (DirectL    , convolveL)
   , (StreamNaive, convolveS)
   , (Golf       , (#))
+  , (Conal      , (<.>))
   , (FFT1       , FFT.convolve)
   , (FFT2       , FFT.convolve')
   ]
@@ -81,6 +84,7 @@ main = defaultMain
     "Naive"
     [ bench "Naive Convolution"                (runConv Naive)
     , bench "Golf"                             (runConv Golf)
+    , bench "Conal"                            (runConv Conal)
     , bench "Reduced Convolution"              (runConv Reduced)
     , bench "Parallelized Convolution"         (runConv Parallel)
     , bench "Vector Naive Convolution"         (runConvV VectorNaive)

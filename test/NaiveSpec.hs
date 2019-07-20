@@ -6,6 +6,8 @@ module NaiveSpec
 
 import Naive
 
+import Semi
+
 import Test.Hspec
 import Test.QuickCheck
 import Test.QuickCheck.Instances.Vector ()
@@ -96,6 +98,12 @@ spec = do
     it ("convolves " ++ show hs ++ " with " ++ show xs ++ " using (#)") $ hs #
       xs `shouldBe`
       hxs
+    it
+      ("convolves " ++ show hs ++ " with " ++ show xs ++
+       " using Conal Elliot's <.>") $
+      hs <.>
+      xs `shouldBe`
+      hxs
   describe "Commutativity" $ do
     it "of convolve" $ property $ \(NonEmpty pxs) (NonEmpty phs) ->
       convolve (pxs :: [Int]) (phs :: [Int]) == convolve phs pxs
@@ -133,3 +141,5 @@ spec = do
       convolveS (pxs :: [Int]) (phs :: [Int]) == convolveS phs pxs
     it "of (#)" $ property $ \(NonEmpty pxs) (NonEmpty phs) ->
       (pxs :: [Int]) # (phs :: [Int]) == phs # pxs
+    it "of Conal Elliot's <.>" $ property $ \(NonEmpty pxs) (NonEmpty phs) ->
+      convolve (pxs :: [Int]) (phs :: [Int]) == convolve phs pxs

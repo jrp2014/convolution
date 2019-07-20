@@ -16,7 +16,8 @@ author:              jrp2014
 category:            Math
 extra-source-files:  CHANGELOG.md, README.md
 build-type:          Simple
-tested-with:         GHC == 8.6.4, GHC == 8.4.4, GHC == 8.2.2, GHC == 8.0.2,
+tested-with:         GHC == 8.6.5, 
+                     GHC == 8.6.4, GHC == 8.4.4, GHC == 8.2.2, GHC == 8.0.2,
                      GHC == 7.10.3
 
 source-repository      head
@@ -34,6 +35,11 @@ common base
                        , vector
                        , parallel
                        , array
+                       , data-inttrie
+                       , finite-typelits
+                       , vector-sized
+                       , deepseq
+                       , MemoTrie
   hs-source-dirs:      src
   if flag (LLVM)
     ghc-options: -Wall -Wextra -Wincomplete-record-updates
@@ -70,30 +76,37 @@ library
   -- other-modules:
   -- other-extensions:
 
+library
+  import:              base
+  exposed-modules:     Semi
+  hs-source-dirs:      conal
+  other-modules:       Misc
+  install-includes:    GenInstances.inc
+
 benchmark              bench-convolution
   import:              main
   type:                exitcode-stdio-1.0
   main-is:             Main.hs
   other-modules:       Naive, FFT
-  hs-source-dirs:      bench, src
+  hs-source-dirs:      bench, src, conal
   -- other-extensions:
 
 executable             profiled-convolution
   import:              profiled-main
   main-is:             Main.hs
   other-modules:       Naive, FFT
-  hs-source-dirs:      bench, src
+  hs-source-dirs:      bench, src, conal
   -- other-extensions:
 
 test-suite             hspec-convolution
   import:              main
   type:                exitcode-stdio-1.0
   main-is:             Spec.hs
-  other-modules:       Naive, NaiveSpec
+  other-modules:       Naive, NaiveSpec, Semi
   -- other-extensions:
   build-tool-depends:  hspec-discover:hspec-discover
   build-depends:         QuickCheck
                        , quickcheck-instances
                        , hspec
                        , hspec-core
-  hs-source-dirs:      test, src
+  hs-source-dirs:      test, src, conal
