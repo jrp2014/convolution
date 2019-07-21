@@ -87,14 +87,14 @@ benchmark              bench-convolution
   import:              main
   type:                exitcode-stdio-1.0
   main-is:             Main.hs
-  other-modules:       Naive, FFT
+  other-modules:       Naive, FFT, Misc, Semi
   hs-source-dirs:      bench, src, conal
   -- other-extensions:
 
 executable             profiled-convolution
   import:              profiled-main
   main-is:             Main.hs
-  other-modules:       Naive, FFT
+  other-modules:       Naive, FFT, Misc, Semi
   hs-source-dirs:      bench, src, conal
   -- other-extensions:
 
@@ -102,7 +102,7 @@ test-suite             hspec-convolution
   import:              main
   type:                exitcode-stdio-1.0
   main-is:             Spec.hs
-  other-modules:       Naive, NaiveSpec, Semi
+  other-modules:       Naive, NaiveSpec, Semi, Misc
   -- other-extensions:
   build-tool-depends:  hspec-discover:hspec-discover
   build-depends:         QuickCheck

@@ -494,7 +494,9 @@ instance Additive b => Additive [b] where
 instance (Semiring b, D01 b) => Semiring [b] where
   one = one : zero
   [] <.> _ = []  -- 0 * q == 0
+  -- _ <.> [] = []  -- q * 0 == 0
   (a : dp) <.> q = a .> q <+> (zero : dp <.> q)
+  --(x:xs) <.> yys@(y:ys) = (x<.>y) : map (x<.>) ys <+> xs <.> yys
 
 instance DetectableZero [b] where isZero = null
 
